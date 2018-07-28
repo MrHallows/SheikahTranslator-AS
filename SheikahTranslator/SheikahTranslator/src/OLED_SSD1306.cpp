@@ -1,4 +1,6 @@
-/**/
+/* *
+ * Class for interfacing with the SSD1306 OLED display
+ */
 
 #include "OLED_SSD1306.h"
 

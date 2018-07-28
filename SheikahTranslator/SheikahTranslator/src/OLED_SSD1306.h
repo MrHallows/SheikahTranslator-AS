@@ -28,7 +28,6 @@
 #include "../include/F6x8.h"
 #include "../include/F8x16.h"
 #include "../include/SheikahEyeSplash.h"
-//#include "../include/Mickey.h"
 
 
 // OLED Resolution
