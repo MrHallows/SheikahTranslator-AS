@@ -1,0 +1,11 @@
+﻿Atmel Studio 7 External Tools Setup:
+1) Navigate to Tools > External Tools
+2) Add the following information:
+	Title: Upload Sketch to Arduino
+	Command: C:\WinAVR-20100110\bin\avrdude.exe
+	Arguments: -C "C:\WinAVR-20100110\bin\avrdude.conf" -p atmega328p -c arduino -P COM3 -b 57600 -U flash:w:$(TargetName).hex:i
+	Initial directory: $(TargetDir)
+3) Tick the "Use Output window" checkbox
+4) Click Apply/OK
+5) Build the project (F7)
+6) Navigate to Tools > Upload Sketch to Arduino
