@@ -169,8 +169,6 @@ static const unsigned char HR_Top[6] PROGMEM = { 0x02, 0x02, 0x02, 0x02, 0x02, 0
 static const unsigned char HR_Middle[6] PROGMEM = { 0x08, 0x08, 0x08, 0x08, 0x08, 0x08 };
 static const unsigned char HR_Bottom[6] PROGMEM = { 0x40, 0x40, 0x40, 0x40, 0x40, 0x40 };
 
-static bool initialized = false; // Has the Sheikah Character Map been initialized?
-
 
 class OLED_SSD1306
 {

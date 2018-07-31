@@ -176,6 +176,8 @@ void OLED_SSD1306::setPosition(unsigned char x, unsigned char y)
 // Load char array data from PROGMEM
 void OLED_SSD1306::loadSplash(void)
 {
+	this->clearBuffer();
+
 	int i = 0;
 
 	for(i = 0; i < 1024; i++)
@@ -186,7 +188,7 @@ void OLED_SSD1306::loadSplash(void)
 	while(1)
 	{
 		if(digitalRead(BTN_A_PIN) == HIGH || digitalRead(BTN_B_PIN) == HIGH) {
-			this->clearBuffer();
+			//this->clearBuffer();
 			return;
 		}
 	}
@@ -196,6 +198,7 @@ void OLED_SSD1306::loadSplash(void)
 // Display the title screen
 void OLED_SSD1306::loadTitle(void)
 {
+	this->clearBuffer();
 	this->drawRect(0, 5, 127, 17, 0);
 	this->drawPixel(53, 51);
 	this->drawPixel(60, 51);
@@ -212,7 +215,7 @@ void OLED_SSD1306::loadTitle(void)
 	while(1)
 	{
 		if(digitalRead(BTN_A_PIN) == HIGH || digitalRead(BTN_B_PIN) == HIGH) {
-			this->clearBuffer();
+			//this->clearBuffer();
 			return;
 		}
 	}
@@ -224,8 +227,11 @@ void OLED_SSD1306::mainMenu(void)
 {
 	this->currentMenu = 4;
 	unsigned char selectorX = 0;
+	this->prevSelectorPosX = 0;
+	this->prevSelectorPosY = 4;
 	//(*menus[currentMenu])();
 
+	this->clearBuffer();
 	this->drawRect(0, 5, 127, 17, 0);
 	this->flushBuffer();
 
@@ -291,15 +297,15 @@ void OLED_SSD1306::mainMenu(void)
 		if(digitalRead(BTN_A_PIN) == HIGH) {
 			// Store prevCursorPosX
 			if(this->currentMenu == 4) {
-				this->clearBuffer();
+				//this->clearBuffer();
 				return this->printSheikahMap();
 			}
 			if(this->currentMenu == 5) {
-				this->clearBuffer();
+				//this->clearBuffer();
 				return this->settingsMenu();
 			}
 			if(this->currentMenu == 6) {
-				this->clearBuffer();
+				//this->clearBuffer();
 				return this->graphicsTest();
 			}
 			delay(200);
@@ -311,28 +317,96 @@ void OLED_SSD1306::mainMenu(void)
 // Settings Menu
 void OLED_SSD1306::settingsMenu(void)
 {
-	initialized = false;
+	this->currentMenu = 4;
+	unsigned char selectorX = 0;
+	this->prevSelectorPosX = 0;
+	this->prevSelectorPosY = 4;
+	//(*menus[currentMenu])();
 
-	//this->clearBuffer();
+	this->clearBuffer();
 	this->drawRect(0, 5, 127, 17, 0);
-	this->drawPixel(53, 51);
-	this->drawPixel(60, 51);
-	this->drawPixel(67, 51);
-	this->drawPixel(74, 51);
 	this->flushBuffer();
-	this->print6x8Str(40, 1, "Settings");
 
-	// Wait for B button to be pressed
+	this->print6x8Str(40, 1, "Settings");
+	this->setSelector(selectorX, this->currentMenu);
+	this->print6x8Str(6, 4, "Contrast");
+	this->print6x8Str(6, 5, "Setting 2");
+	this->print6x8Str(6, 6, "Setting 3");
+
+	// Wait for a selection to be made
 	while(1)
 	{
-		if(digitalRead(BTN_B_PIN) == HIGH) {
-			//if(digitalRead(BTN_B_PIN) == LOW) {
-				this->clearBuffer();
-				this->mainMenu();
-			//}
+		// Up
+		if(digitalRead(BTN_UP_PIN) == HIGH) {
+			// Store prevSelectorPosY
+			this->prevMenu = this->currentMenu;
+			// Decrement selectorPosY
+			if(this->currentMenu <= 4) {
+				this->currentMenu = 6;
+				this->prevMenu = 4;
+			}
+			else
+			this->currentMenu--;
+
+			//this->clearPrevSelector();
+			unsigned char i = 0;
+
+			this->setPosition(selectorX, this->prevMenu);
+
+			for (i = 0; i < 6; i++)
+			this->writeData(pgm_read_byte(&(SelectorBlank[i])));
+
+			this->setSelector(selectorX, this->currentMenu);
+			delay(200);
 		}
 
-		//this->handleInput();
+		// Down
+		if(digitalRead(BTN_DOWN_PIN) == HIGH) {
+			// Store prevSelectorPosY
+			this->prevMenu = this->currentMenu;
+			// Increment selectorPosY
+			if(this->currentMenu >= 6) {
+				this->currentMenu = 4;
+				this->prevMenu = 6;
+			}
+			else
+			this->currentMenu++;
+
+			//this->clearPrevSelector();
+			unsigned char i = 0;
+
+			this->setPosition(selectorX, this->prevMenu);
+
+			for (i = 0; i < 6; i++)
+			this->writeData(pgm_read_byte(&(SelectorBlank[i])));
+
+			this->setSelector(selectorX, this->currentMenu);
+			delay(200);
+		}
+
+		// A
+		if(digitalRead(BTN_A_PIN) == HIGH) {
+			// Store prevCursorPosX
+			if(this->currentMenu == 4) {
+				//this->clearBuffer();
+				return this->printSheikahMap();
+			}
+			if(this->currentMenu == 5) {
+				//this->clearBuffer();
+				return this->settingsMenu();
+			}
+			if(this->currentMenu == 6) {
+				//this->clearBuffer();
+				return this->graphicsTest();
+			}
+			delay(200);
+		}
+
+		// B
+		if(digitalRead(BTN_B_PIN) == HIGH) {
+			//this->clearBuffer();
+			return this->mainMenu();
+		}
 	}
 }
 
@@ -890,48 +964,49 @@ void OLED_SSD1306::drawBitmap(unsigned char x0, unsigned char y0, unsigned char 
 // Graphics Test
 void OLED_SSD1306::graphicsTest(void)
 {
-	initialized = false;
+	//while(digitalRead(BTN_B_PIN) == LOW)
+	//{
+		this->clearBuffer();
+		this->print6x8Str(0, 0, "Graphics test..");
+		delay(3000);
+		this->clearBuffer();
 
-	this->clearBuffer();
-	this->print6x8Str(0, 0, "Graphics test..");
-	delay(3000);
-	this->clearBuffer();
+		// Draw pixel
+		this->print6x8Str(0, 0, "Draw pixel..");
+		delay(2000);
+		this->clearBuffer();
+		this->drawPixel(63, 31);
+		this->flushBuffer();
+		delay(3000);
+		this->clearBuffer();
 
-	// Draw pixel
-	this->print6x8Str(0, 0, "Draw pixel..");
-	delay(2000);
-	this->clearBuffer();
-	this->drawPixel(0, 0);
-	this->flushBuffer();
-	delay(3000);
-	this->clearBuffer();
+		// Draw line
+		this->print6x8Str(0, 0, "Draw line..");
+		delay(2000);
+		this->clearBuffer();
+		this->drawLine(0, 31, 127, 31, 0);
+		this->flushBuffer();
+		delay(3000);
+		this->clearBuffer();
 
-	// Draw line
-	this->print6x8Str(0, 0, "Draw line..");
-	delay(2000);
-	this->clearBuffer();
-	this->drawLine(0, 31, 127, 31, 0);
-	this->flushBuffer();
-	delay(3000);
-	this->clearBuffer();
+		// Draw rectangle
+		this->print6x8Str(0, 0, "Draw rectangle..");
+		delay(2000);
+		this->clearBuffer();
+		this->drawRect(0, 0, 127, 63, 0);
+		this->flushBuffer();
+		delay(3000);
+		this->clearBuffer();
 
-	// Draw rectangle
-	this->print6x8Str(0, 0, "Draw rectangle..");
-	delay(2000);
-	this->clearBuffer();
-	this->drawRect(0, 0, 127, 63, 0);
-	this->flushBuffer();
-	delay(3000);
-	this->clearBuffer();
-
-	// Draw circle
-	this->print6x8Str(0, 0, "Draw circle..");
-	delay(2000);
-	this->clearBuffer();
-	this->drawCircle(63, 31, 20);
-	this->flushBuffer();
-	delay(3000);
-	this->clearBuffer();
+		// Draw circle
+		this->print6x8Str(0, 0, "Draw circle..");
+		delay(2000);
+		this->clearBuffer();
+		this->drawCircle(63, 31, 20);
+		this->flushBuffer();
+		delay(3000);
+		//this->clearBuffer();
+	//}
 
 	// Wait for B button to be pressed
 	/*while(1)
@@ -947,7 +1022,7 @@ void OLED_SSD1306::graphicsTest(void)
 		this->handleInput();
 	}*/
 
-	this->activeMenu = SHEIKAH_CHAR;
+	return this->mainMenu();
 }
 
 
@@ -977,17 +1052,14 @@ void OLED_SSD1306::printSheikahMap(void)
 		y++;
 	}*/
 
-	//if(!initialized) {
-		this->drawLine(0, 35, 127, 35, 0);
-		this->drawLine(0, 54, 127, 54, 0);
-		this->flushBuffer();
-		//this->setSelector(this->selectorPosX, this->selectorPosY);
-		this->setSelectorPos(this->selectorPosX, this->selectorPosY);
-		this->setCursor(this->cursorPosX * 6, this->cursorPosY);
-		this->print6x8Str(0, 7, ">");
-
-		//initialized = true;
-	//}
+	this->clearBuffer();
+	this->drawLine(0, 35, 127, 35, 0);
+	this->drawLine(0, 54, 127, 54, 0);
+	this->flushBuffer();
+	//this->setSelector(this->selectorPosX, this->selectorPosY);
+	this->setSelectorPos(this->selectorPosX, this->selectorPosY);
+	this->setCursor(this->cursorPosX * 6, this->cursorPosY);
+	this->print6x8Str(0, 7, ">");
 
 	this->print8x8Str(6, 0, "A");
 	this->print8x8Str(24, 0, "B");
@@ -1163,15 +1235,12 @@ void OLED_SSD1306::printSheikahMap(void)
 // Print Sheikah Number Map
 void OLED_SSD1306::printSheikahNums(void)
 {
-	if(!initialized) {
-		this->drawLine(0, 35, 127, 35, 0);
-		this->drawLine(0, 54, 127, 54, 0);
-		this->flushBuffer();
-		this->setSelectorPos(this->selectorPosX, this->selectorPosY);
-		this->setCursor(this->cursorPosX * 6, this->cursorPosY);
-
-		initialized = true;
-	}
+	this->clearBuffer();
+	this->drawLine(0, 35, 127, 35, 0);
+	this->drawLine(0, 54, 127, 54, 0);
+	this->flushBuffer();
+	this->setSelectorPos(this->selectorPosX, this->selectorPosY);
+	this->setCursor(this->cursorPosX * 6, this->cursorPosY);
 
 	this->print8x8Str(6, 1, "");
 	this->print8x8Str(24, 1, "0");
