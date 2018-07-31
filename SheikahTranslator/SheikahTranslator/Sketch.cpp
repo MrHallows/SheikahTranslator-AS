@@ -12,6 +12,15 @@
  * Replace:	$1{ $2 }$3
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Equation for centering text:
+ * L = length of text (i.e., "Main Menu" is 9 characters * 6 = 54
+ * SW = Screen Width (128)
+ * 
+ * (0.5)SW - (0.5)L = X position of text
+ * Ex.: 64 - 27 = 37 => print6x8Str(37, 0, "Main Menu");
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 
 //#include <Arduino.h> // Included in "src/OLED_SSD1306.h"
 //#include <SPI.h> // Included in "utilities/SRAM_23LC1024.h"
@@ -95,6 +104,7 @@ void setup()
 
 	OLED.loadSplash();
 	OLED.loadTitle();
+	OLED.mainMenu();
 	
 	//OLED.drawBitmap(32, 0, 96, OLED_HEIGHT, Mickey);
 	//delay(10000); //15000
@@ -167,8 +177,8 @@ void setup()
 void loop()
 {
 	//OLED.printSheikahMap();
-	OLED.displayMenu();
-	OLED.moveSelector();
+	//OLED.displayMenu();
+	//OLED.moveSelector();
 
 	//EEPROM_TestLoop();
 }

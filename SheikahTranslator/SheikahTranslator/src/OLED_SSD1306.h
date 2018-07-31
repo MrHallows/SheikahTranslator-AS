@@ -189,6 +189,7 @@ public:
 	void setPosition(unsigned char x, unsigned char y); 		// Set the coordinates
 	void loadSplash(void);										// Load the splash screen bitmap from flash memory
 	void loadTitle(void);										// Load the title screen
+	void mainMenu(void);										// Menu for selecting other menus and screens
 	void settingsMenu(void);									// Display the Settings menu
 	void displayMenu(void);										// Options: SHEIKAH_CHAR, SHEIKAH_NUMS, SETTINGS
 	void handleInput(void);										// Handle Input
@@ -255,9 +256,13 @@ public:
 	void setCommonConfig(unsigned char d); 						// 
 	void setVCOMH(unsigned char d); 							// 
 	void setNOP(void); 											// 
+
+	//void (*menus[4])() = { mainMenu, printSheikahMap, settingsMenu, graphicsTest };	// Array of Menu Selection Function Pointers
 	
 	unsigned char buffer[1024]; 								// Screen buffer
 	unsigned char activeMenu = SHEIKAH_CHAR;
+	unsigned char currentMenu = 0;
+	unsigned char prevMenu;
 
 	unsigned char selectorPosX = 0;
 	unsigned char selectorPosY = 0;

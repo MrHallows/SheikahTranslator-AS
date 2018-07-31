@@ -219,31 +219,120 @@ void OLED_SSD1306::loadTitle(void)
 }
 
 
+// 
+void OLED_SSD1306::mainMenu(void)
+{
+	this->currentMenu = 4;
+	unsigned char selectorX = 0;
+	//(*menus[currentMenu])();
+
+	this->drawRect(0, 5, 127, 17, 0);
+	this->flushBuffer();
+
+	//this->setPosition(0, 0);
+	this->print6x8Str(37, 1, "Main Menu");
+	this->setSelector(selectorX, this->currentMenu);
+	this->print6x8Str(6, 4, "Translator");
+	this->print6x8Str(6, 5, "Settings");
+	this->print6x8Str(6, 6, "Graphics Test");
+
+	// Wait for a selection to be made
+	while(1)
+	{
+		// Up
+		if(digitalRead(BTN_UP_PIN) == HIGH) {
+			// Store prevSelectorPosY
+			this->prevMenu = this->currentMenu;
+			// Decrement selectorPosY
+			if(this->currentMenu <= 4) {
+				this->currentMenu = 6;
+				this->prevMenu = 4;
+			}
+			else
+				this->currentMenu--;
+
+			//this->clearPrevSelector();
+			unsigned char i = 0;
+
+			this->setPosition(selectorX, this->prevMenu);
+
+			for (i = 0; i < 6; i++)
+				this->writeData(pgm_read_byte(&(SelectorBlank[i])));
+
+			this->setSelector(selectorX, this->currentMenu);
+			delay(200);
+		}
+
+		// Down
+		if(digitalRead(BTN_DOWN_PIN) == HIGH) {
+			// Store prevSelectorPosY
+			this->prevMenu = this->currentMenu;
+			// Increment selectorPosY
+			if(this->currentMenu >= 6) {
+				this->currentMenu = 4;
+				this->prevMenu = 6;
+			}
+			else
+				this->currentMenu++;
+
+			//this->clearPrevSelector();
+			unsigned char i = 0;
+
+			this->setPosition(selectorX, this->prevMenu);
+
+			for (i = 0; i < 6; i++)
+				this->writeData(pgm_read_byte(&(SelectorBlank[i])));
+
+			this->setSelector(selectorX, this->currentMenu);
+			delay(200);
+		}
+
+		// A
+		if(digitalRead(BTN_A_PIN) == HIGH) {
+			// Store prevCursorPosX
+			if(this->currentMenu == 4) {
+				this->clearBuffer();
+				return this->printSheikahMap();
+			}
+			if(this->currentMenu == 5) {
+				this->clearBuffer();
+				return this->settingsMenu();
+			}
+			if(this->currentMenu == 6) {
+				this->clearBuffer();
+				return this->graphicsTest();
+			}
+			delay(200);
+		}
+	}
+}
+
+
 // Settings Menu
 void OLED_SSD1306::settingsMenu(void)
 {
 	initialized = false;
 
 	//this->clearBuffer();
-	this->drawRect(2, 5, 127, 17, 1);
+	this->drawRect(0, 5, 127, 17, 0);
 	this->drawPixel(53, 51);
 	this->drawPixel(60, 51);
 	this->drawPixel(67, 51);
 	this->drawPixel(74, 51);
 	this->flushBuffer();
+	this->print6x8Str(40, 1, "Settings");
 
 	// Wait for B button to be pressed
 	while(1)
 	{
 		if(digitalRead(BTN_B_PIN) == HIGH) {
-			if(digitalRead(BTN_B_PIN) == LOW) {
+			//if(digitalRead(BTN_B_PIN) == LOW) {
 				this->clearBuffer();
-				this->activeMenu = SHEIKAH_CHAR;
-				return;
-			}
+				this->mainMenu();
+			//}
 		}
 
-		this->handleInput();
+		//this->handleInput();
 	}
 }
 
@@ -873,6 +962,10 @@ void OLED_SSD1306::graphicsTest(void)
 // TODO: Create a for loop to display this [hopefully] using less memory.
 void OLED_SSD1306::printSheikahMap(void)
 {
+	this->selectorPosX = 0;
+	this->selectorPosY = 0;
+	this->cursorPosX = 1;
+	this->cursorPosY = 7;
 	/*unsigned char x = 6, y = 0, i = 0;
 
 	for(i = 0; i < sizeof(SheikahChars); i++)
@@ -884,15 +977,17 @@ void OLED_SSD1306::printSheikahMap(void)
 		y++;
 	}*/
 
-	if(!initialized) {
+	//if(!initialized) {
 		this->drawLine(0, 35, 127, 35, 0);
 		this->drawLine(0, 54, 127, 54, 0);
 		this->flushBuffer();
+		//this->setSelector(this->selectorPosX, this->selectorPosY);
 		this->setSelectorPos(this->selectorPosX, this->selectorPosY);
 		this->setCursor(this->cursorPosX * 6, this->cursorPosY);
+		this->print6x8Str(0, 7, ">");
 
-		initialized = true;
-	}
+		//initialized = true;
+	//}
 
 	this->print8x8Str(6, 0, "A");
 	this->print8x8Str(24, 0, "B");
@@ -926,7 +1021,142 @@ void OLED_SSD1306::printSheikahMap(void)
 	this->print8x8Str(96, 3, " ");
 	this->print8x8Str(114, 3, ".");
 
-	this->handleInput();
+	//this->handleInput();
+	//this->moveSelector();
+
+	while(1)
+	{
+		// Up
+		if(digitalRead(BTN_UP_PIN) == HIGH) {
+			// Store prevSelectorPosY
+			this->prevSelectorPosY = this->selectorPosY;
+			// Decrement selectorPosY
+			if(this->selectorPosY <= 0) {
+				this->selectorPosY = 3;
+				this->prevSelectorPosY = 0;
+			}
+			else
+				this->selectorPosY--;
+
+			this->clearPrevSelector();
+			this->setSelectorPos(this->selectorPosX, this->selectorPosY);
+			delay(200);
+		}
+
+		// Down
+		if(digitalRead(BTN_DOWN_PIN) == HIGH) {
+			// Store prevSelectorPosY
+			this->prevSelectorPosY = this->selectorPosY;
+			// Increment selectorPosY
+			if(this->selectorPosY > 3) {
+				this->selectorPosY = 0;
+				this->prevSelectorPosY = 3;
+			}
+			else
+				this->selectorPosY++;
+
+			this->clearPrevSelector();
+			this->setSelectorPos(this->selectorPosX, this->selectorPosY);
+			delay(200);
+		}
+
+		// Left
+		if(digitalRead(BTN_LEFT_PIN) == HIGH) {
+			// Store prevSelectorPosX
+			this->prevSelectorPosX = this->selectorPosX;
+			// Decrement selectorPosX
+			if(this->selectorPosX <= 0) {
+				this->selectorPosX = 6;
+				this->prevSelectorPosX = 0;
+			}
+			else
+				this->selectorPosX--;
+
+			this->clearPrevSelector();
+			this->setSelectorPos(this->selectorPosX, this->selectorPosY);
+			delay(200);
+		}
+
+		// Right
+		if(digitalRead(BTN_RIGHT_PIN) == HIGH) {
+			// Store prevSelectorPosX
+			this->prevSelectorPosX = this->selectorPosX;
+			// Increment selectorPosX
+			if(this->selectorPosX > 6) {
+				this->selectorPosX = 0;
+				this->prevSelectorPosX = 6;
+			}
+			else
+				this->selectorPosX++;
+
+			this->clearPrevSelector();
+			this->setSelectorPos(this->selectorPosX, this->selectorPosY);
+			delay(200);
+		}
+
+		// A
+		if(digitalRead(BTN_A_PIN) == HIGH) {
+			// Store prevCursorPosX
+			this->prevCursorPosX = this->cursorPosX - 1;
+			// Increment selectorPosX
+			if(this->cursorPosX >= 14) { //20
+				this->cursorPosX = 14; //20
+				this->prevCursorPosX = 13; //19
+			}
+			else {
+				this->cursorPosX++;
+			}
+			//this->clearPrevCursor();
+			this->setCursorPos(this->cursorPosX, this->cursorPosY);
+			this->print6x8Single(this->prevCursorPosX * 6, 7, this->getSelectedChar());
+			this->print8x8Single(this->prevCursorPosX * 9, 5, this->getSelectedChar());
+			//this->cursorPosX++;
+			//this->setCursor(this->cursorPosX * 6, 7);
+			delay(200);
+		}
+
+		// B
+		if(digitalRead(BTN_B_PIN) == HIGH) {
+			//this->clearLine();
+			this->backspace();
+			this->backspace_8x8();
+		
+			// Store prevCursorPosX
+			this->prevCursorPosX = this->cursorPosX + 1;
+		
+			delay(200);
+		}
+
+		/*this->print6x8Str(0, 4, "CursorX: ");
+		this->printValueI(67, 4, this->cursorPosX);
+		this->print6x8Str(0, 5, "pCursorX: ");
+		this->printValueI(67, 5, this->prevCursorPosX);*/
+
+		/*this->print6x8Str(0, 4, "SelectorX: ");
+		this->printValueI(67, 4, this->selectorPosX);
+		this->print6x8Str(0, 5, "SelectorY: ");
+		this->printValueI(67, 5, this->selectorPosY);*/
+
+		/*this->print6x8Str(0, 4, "Selected Char: [");
+		this->print6x8Single(96, 4, this->getSelectedChar());
+		this->print6x8Str(102, 4, "]");*/
+	
+		//this->print6x8Str(0, 7, ">");
+
+		/*this->print6x8Str(0, 6, "PreviousX: ");
+		this->printValueI(67, 6, this->prevSelectorPosX);
+		this->print6x8Str(0, 7, "PreviousY: ");
+		this->printValueI(67, 7, this->prevSelectorPosY);*/
+
+		// B && Up
+		if(digitalRead(BTN_B_PIN) == HIGH && digitalRead(BTN_UP_PIN) == HIGH) {
+			// Switch to main menu
+			this->clearBuffer();
+			return this->mainMenu();
+		
+			delay(120);
+		}
+	}
 }
 
 
@@ -967,7 +1197,7 @@ void OLED_SSD1306::printSheikahNums(void)
 	this->print8x8Str(96, 3, "");
 	this->print8x8Str(114, 3, "");*/
 
-	this->handleInput();
+	//this->handleInput();
 }
 
 
@@ -1332,14 +1562,14 @@ void OLED_SSD1306::backspace_8x8(void)
 
 	if(this->cursorPosX < 2)
 		this->cursorPosX = 1;
-	else
+	/*else
 	{
 		this->prevCursorPosX++;
 		//this->clearPrevCursor();
 		this->cursorPosX--;
 		this->prevCursorPosX--;
-	}
-	this->setCursor(this->cursorPosX * 9, 5);
+	}*/
+	//this->setCursor(this->cursorPosX * 9, 5);
 }
 
 
