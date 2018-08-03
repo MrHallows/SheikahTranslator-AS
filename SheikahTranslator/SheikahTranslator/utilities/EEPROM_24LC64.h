@@ -16,8 +16,8 @@
  */
 #pragma once
 
-#ifndef MEMORY_H
-#define MEMORY_H
+#ifndef EEPROM_24LC64_H
+#define EEPROM_24LC64_H
 
 #include <Arduino.h>
 #include <Wire.h>
@@ -36,4 +36,4 @@ public:
 	unsigned char loadBitmap(int deviceAddr, unsigned int chipAddr, unsigned char length);
 };
 
-#endif /* defined("MEMORY_H") */
+#endif /* defined("EEPROM_24LC64_H") */

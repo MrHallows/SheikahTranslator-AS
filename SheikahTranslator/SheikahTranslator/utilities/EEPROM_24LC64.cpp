@@ -22,6 +22,8 @@ void EEPROM_24LC64::writeByte(int deviceAddr, unsigned int chipAddr, unsigned ch
     Wire.write((int)(chipAddr & 0xFF)); // LSB (Least Significant Bit)
     Wire.write(rdata);
     Wire.endTransmission();
+
+    delay(5);
 }
 
 // WARNING: Address is a page address, 6-bit end will wrap around.
@@ -33,7 +35,10 @@ void EEPROM_24LC64::writePage(int deviceAddr, unsigned int chipAddr, unsigned ch
     Wire.write((int)(chipAddr & 0xFF)); // LSB (Least Significant Bit)
     unsigned char c;
     for(c = 0; c < length; c++)
+	{
         Wire.write(data[c]);
+        //delay(5);
+	}
     Wire.endTransmission();
 }
 
@@ -88,7 +93,7 @@ void EEPROM_24LC64::writeBitmap(int deviceAddr, unsigned int chipAddr, unsigned 
 			this->writePage(deviceAddr, (chipAddr + i), &data[j], buffer);
 			i++;
 			j++;
-			delay(100);
+			delay(5);
 		}
 		c = 0;
 	}

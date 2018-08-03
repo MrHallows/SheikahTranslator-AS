@@ -32,7 +32,7 @@
 
 
 OLED_SSD1306 OLED;
-//EEPROM_24LC64 EEPROM;
+EEPROM_24LC64 _EEPROM;
 //SRAM_23LC1024 SRAM;
 
 
@@ -177,7 +177,6 @@ void setup()
 void loop()
 {
 	//OLED.printSheikahMap();
-	//OLED.displayMenu();
 	//OLED.moveSelector();
 
 	//EEPROM_TestLoop();

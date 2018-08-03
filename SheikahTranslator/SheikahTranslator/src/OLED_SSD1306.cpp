@@ -147,6 +147,7 @@ void OLED_SSD1306::clearBuffer(void)
 void OLED_SSD1306::flushBuffer(void)
 {
 	int i, j;
+	this->setPosition(0, 0);
 
 	for(i = 0; i < 1024; i++) //OLED_WIDTH
 	{
@@ -188,7 +189,6 @@ void OLED_SSD1306::loadSplash(void)
 	while(1)
 	{
 		if(digitalRead(BTN_A_PIN) == HIGH || digitalRead(BTN_B_PIN) == HIGH) {
-			//this->clearBuffer();
 			return;
 		}
 	}
@@ -199,7 +199,7 @@ void OLED_SSD1306::loadSplash(void)
 void OLED_SSD1306::loadTitle(void)
 {
 	this->clearBuffer();
-	this->drawRect(0, 5, 127, 17, 0);
+	this->drawRect(0, 5, 127, 18, 0);
 	this->drawPixel(53, 51);
 	this->drawPixel(60, 51);
 	this->drawPixel(67, 51);
@@ -215,7 +215,6 @@ void OLED_SSD1306::loadTitle(void)
 	while(1)
 	{
 		if(digitalRead(BTN_A_PIN) == HIGH || digitalRead(BTN_B_PIN) == HIGH) {
-			//this->clearBuffer();
 			return;
 		}
 	}
@@ -229,10 +228,9 @@ void OLED_SSD1306::mainMenu(void)
 	unsigned char selectorX = 0;
 	this->prevSelectorPosX = 0;
 	this->prevSelectorPosY = 4;
-	//(*menus[currentMenu])();
 
 	this->clearBuffer();
-	this->drawRect(0, 5, 127, 17, 0);
+	this->drawRect(0, 5, 127, 18, 0);
 	this->flushBuffer();
 
 	//this->setPosition(0, 0);
@@ -297,15 +295,12 @@ void OLED_SSD1306::mainMenu(void)
 		if(digitalRead(BTN_A_PIN) == HIGH) {
 			// Store prevCursorPosX
 			if(this->currentMenu == 4) {
-				//this->clearBuffer();
 				return this->printSheikahMap();
 			}
 			if(this->currentMenu == 5) {
-				//this->clearBuffer();
 				return this->settingsMenu();
 			}
 			if(this->currentMenu == 6) {
-				//this->clearBuffer();
 				return this->graphicsTest();
 			}
 			delay(200);
@@ -321,10 +316,9 @@ void OLED_SSD1306::settingsMenu(void)
 	unsigned char selectorX = 0;
 	this->prevSelectorPosX = 0;
 	this->prevSelectorPosY = 4;
-	//(*menus[currentMenu])();
 
 	this->clearBuffer();
-	this->drawRect(0, 5, 127, 17, 0);
+	this->drawRect(0, 5, 127, 18, 0);
 	this->flushBuffer();
 
 	this->print6x8Str(40, 1, "Settings");
@@ -388,15 +382,12 @@ void OLED_SSD1306::settingsMenu(void)
 		if(digitalRead(BTN_A_PIN) == HIGH) {
 			// Store prevCursorPosX
 			if(this->currentMenu == 4) {
-				//this->clearBuffer();
-				return this->printSheikahMap();
+				return this->setContrast();
 			}
 			if(this->currentMenu == 5) {
-				//this->clearBuffer();
 				return this->settingsMenu();
 			}
 			if(this->currentMenu == 6) {
-				//this->clearBuffer();
 				return this->graphicsTest();
 			}
 			delay(200);
@@ -404,83 +395,97 @@ void OLED_SSD1306::settingsMenu(void)
 
 		// B
 		if(digitalRead(BTN_B_PIN) == HIGH) {
-			//this->clearBuffer();
 			return this->mainMenu();
 		}
 	}
 }
 
 
-// Options: SHEIKAH_CHAR, SHEIKAH_NUMS, SETTINGS
-void OLED_SSD1306::displayMenu(void)
+// Set Contrast
+void OLED_SSD1306::setContrast(void)
 {
-	switch(this->activeMenu)
+	/*! This is causing the display to freeze for some reason..
+	if(this->EEPROM.readByte(0x50, 0) == 0) {
+		this->contrast = 0x7F;
+		this->EEPROM.writeByte(0x50, 0, this->contrast);
+	}
+	else
+		this->contrast = this->EEPROM.readByte(0x50, 0);*/
+
+	unsigned char selectorX = 0;
+	this->prevSelectorPosX = 0;
+	this->prevSelectorPosY = 4;
+
+	this->clearBuffer();
+	this->drawRect(0, 5, 127, 18, 0);
+
+	// Draw the progress bar
+	this->drawRect(0, 52, 127, 58, 0);
+	this->drawRect(2, 54, 125, 56, 0);
+
+	//this->drawCircle(50, 52, 6);
+	this->flushBuffer();
+
+	this->print6x8Str(40, 1, "Contrast");
+	this->print6x8Str(43, 4, "<");
+	//this->printValueI(18, 4, this->contrast);
+	this->print6x8Str(79, 4, ">");
+	/*this->print6x8Str(6, 6, "Press");
+	this->print6x8Str(48, 6, "B");
+	this->print6x8Str(66, 6, "to go back");*/
+
+	// Wait for a selection to be made
+	while(1)
 	{
-		case SHEIKAH_CHAR:
-			//this->clearBuffer();
-			this->printSheikahMap();
-			break;
+		// Left
+		if(digitalRead(BTN_LEFT_PIN) == HIGH) {
+			// Decrement contrast
+			if(this->contrast <= 0x00) {
+				this->contrast = 0x00;
+			}
+			else {
+				this->contrast--;
 
-		case SHEIKAH_NUMS:
-			//this->clearBuffer();
-			this->printSheikahNums();
-			break;
+				if(this->contrast % 2 == 0) {
+					this->contrastBar--;
+				}
+			}
+			this->clearBuffer();
+			this->drawRect(2, 54, this->contrastBar, 56, 0);
+			this->flushBuffer();
 
-		case SETTINGS:
-			//this->clearBuffer();
-			this->settingsMenu();
-			break;
+			this->setContrastControl(this->contrast);
+			delay(50);
+		}
 
-		case GRAPHICS:
-			//this->clearBuffer();
-			this->graphicsTest();
-			break;
+		// Right
+		if(digitalRead(BTN_RIGHT_PIN) == HIGH) {
+			// Increment contrast
+			if(this->contrast >= 0xFF) {
+				this->contrast = 0xFF;
+			}
+			else {
+				this->contrast++;
 
-		default:
-			//this->clearBuffer();
-			this->printSheikahMap();
-			break;
-	}
-}
+				if(this->contrast % 2 == 0) {
+					this->contrastBar++;
+				}
+			}
+			this->clearBuffer();
+			this->drawRect(2, 54, this->contrastBar, 56, 0);
+			this->flushBuffer();
 
+			this->setContrastControl(this->contrast);
+			delay(50);
+		}
 
-// Handle Input
-void OLED_SSD1306::handleInput(void)
-{
-	// B && Right
-	if(digitalRead(BTN_B_PIN) == HIGH && digitalRead(BTN_RIGHT_PIN) == HIGH) {
-		// Switch to number map
-		this->clearBuffer();
-		this->activeMenu = SHEIKAH_NUMS;
-		
-		//delay(120);
-	}
+		// B
+		if(digitalRead(BTN_B_PIN) == HIGH) {
+			this->EEPROM.writeByte(0x50, 0, this->contrast);
+			return this->settingsMenu();
+		}
 
-	// B && Left
-	if(digitalRead(BTN_B_PIN) == HIGH && digitalRead(BTN_LEFT_PIN) == HIGH) {
-		// Switch to character map
-		this->clearBuffer();
-		this->activeMenu = SHEIKAH_CHAR;
-		
-		//delay(120);
-	}
-
-	// B && Up
-	if(digitalRead(BTN_B_PIN) == HIGH && digitalRead(BTN_UP_PIN) == HIGH) {
-		// Switch to settings menu
-		this->clearBuffer();
-		this->activeMenu = SETTINGS;
-		
-		//delay(120);
-	}
-
-	// B && Down
-	if(digitalRead(BTN_B_PIN) == HIGH && digitalRead(BTN_DOWN_PIN) == HIGH) {
-		// Switch to graphics test
-		this->clearBuffer();
-		this->activeMenu = GRAPHICS;
-		
-		//delay(120);
+		this->printShortValueI(49, 4, this->contrast);
 	}
 }
 
@@ -685,6 +690,31 @@ void OLED_SSD1306::printValueI(unsigned char x, unsigned char y, int data)
 	this->print6x8Char(x + 18, y, i + 48);
 	this->print6x8Char(x + 24, y, j + 48);
 	this->print6x8Char(x + 30, y, k + 48);
+}
+
+
+// 
+void OLED_SSD1306::printShortValueI(unsigned char x, unsigned char y, int data)
+{
+	unsigned char i, j, k, l, m;
+	if (data < 0)
+	{
+		this->print6x8Char(x, y, '-');
+		data = -data;
+	}
+	/*else
+		this->print6x8Char(x, y, '+');*/
+
+	/*l = data / 10000;
+	m = (data % 10000) / 1000;*/
+	i = (data % 1000) / 100;
+	j = (data % 100) / 10;
+	k = data % 10;
+	/*this->print6x8Char(x + 6, y, l + 48);
+	this->print6x8Char(x + 12, y, m + 48);*/
+	this->print6x8Char(x + 6, y, i + 48);
+	this->print6x8Char(x + 12, y, j + 48);
+	this->print6x8Char(x + 18, y, k + 48);
 }
 
 
@@ -964,63 +994,45 @@ void OLED_SSD1306::drawBitmap(unsigned char x0, unsigned char y0, unsigned char 
 // Graphics Test
 void OLED_SSD1306::graphicsTest(void)
 {
-	//while(digitalRead(BTN_B_PIN) == LOW)
-	//{
-		this->clearBuffer();
-		this->print6x8Str(0, 0, "Graphics test..");
-		delay(3000);
-		this->clearBuffer();
+	this->clearBuffer();
+	this->print6x8Str(0, 0, "Graphics test..");
+	delay(3000);
+	this->clearBuffer();
 
-		// Draw pixel
-		this->print6x8Str(0, 0, "Draw pixel..");
-		delay(2000);
-		this->clearBuffer();
-		this->drawPixel(63, 31);
-		this->flushBuffer();
-		delay(3000);
-		this->clearBuffer();
+	// Draw pixel
+	this->print6x8Str(0, 0, "Draw pixel..");
+	delay(2000);
+	this->clearBuffer();
+	this->drawPixel(63, 31);
+	this->flushBuffer();
+	delay(3000);
+	this->clearBuffer();
 
-		// Draw line
-		this->print6x8Str(0, 0, "Draw line..");
-		delay(2000);
-		this->clearBuffer();
-		this->drawLine(0, 31, 127, 31, 0);
-		this->flushBuffer();
-		delay(3000);
-		this->clearBuffer();
+	// Draw line
+	this->print6x8Str(0, 0, "Draw line..");
+	delay(2000);
+	this->clearBuffer();
+	this->drawLine(0, 31, 127, 31, 0);
+	this->flushBuffer();
+	delay(3000);
+	this->clearBuffer();
 
-		// Draw rectangle
-		this->print6x8Str(0, 0, "Draw rectangle..");
-		delay(2000);
-		this->clearBuffer();
-		this->drawRect(0, 0, 127, 63, 0);
-		this->flushBuffer();
-		delay(3000);
-		this->clearBuffer();
+	// Draw rectangle
+	this->print6x8Str(0, 0, "Draw rectangle..");
+	delay(2000);
+	this->clearBuffer();
+	this->drawRect(0, 0, 127, 63, 0);
+	this->flushBuffer();
+	delay(3000);
+	this->clearBuffer();
 
-		// Draw circle
-		this->print6x8Str(0, 0, "Draw circle..");
-		delay(2000);
-		this->clearBuffer();
-		this->drawCircle(63, 31, 20);
-		this->flushBuffer();
-		delay(3000);
-		//this->clearBuffer();
-	//}
-
-	// Wait for B button to be pressed
-	/*while(1)
-	{
-		if(digitalRead(BTN_B_PIN) == HIGH) {
-			if(digitalRead(BTN_B_PIN) == LOW) {
-				this->clearBuffer();
-				this->activeMenu = SHEIKAH_CHAR;
-				return;
-			}
-		}
-
-		this->handleInput();
-	}*/
+	// Draw circle
+	this->print6x8Str(0, 0, "Draw circle..");
+	delay(2000);
+	this->clearBuffer();
+	this->drawCircle(63, 31, 20);
+	this->flushBuffer();
+	delay(3000);
 
 	return this->mainMenu();
 }
@@ -1056,7 +1068,7 @@ void OLED_SSD1306::printSheikahMap(void)
 	this->drawLine(0, 35, 127, 35, 0);
 	this->drawLine(0, 54, 127, 54, 0);
 	this->flushBuffer();
-	//this->setSelector(this->selectorPosX, this->selectorPosY);
+
 	this->setSelectorPos(this->selectorPosX, this->selectorPosY);
 	this->setCursor(this->cursorPosX * 6, this->cursorPosY);
 	this->print6x8Str(0, 7, ">");
@@ -1092,9 +1104,6 @@ void OLED_SSD1306::printSheikahMap(void)
 	this->print8x8Str(78, 3, "Z");
 	this->print8x8Str(96, 3, " ");
 	this->print8x8Str(114, 3, ".");
-
-	//this->handleInput();
-	//this->moveSelector();
 
 	while(1)
 	{
@@ -1257,16 +1266,6 @@ void OLED_SSD1306::printSheikahNums(void)
 	this->print8x8Str(78, 2, "8");
 	this->print8x8Str(96, 2, "9");
 	this->print8x8Str(114, 2, "");
-
-	/*this->print8x8Str(6, 3, "");
-	this->print8x8Str(24, 3, "");
-	this->print8x8Str(42, 3, "7");
-	this->print8x8Str(60, 3, "8");
-	this->print8x8Str(78, 3, "9");
-	this->print8x8Str(96, 3, "");
-	this->print8x8Str(114, 3, "");*/
-
-	//this->handleInput();
 }
 
 

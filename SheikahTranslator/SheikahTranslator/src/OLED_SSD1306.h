@@ -22,12 +22,14 @@
 #include <Arduino.h>
 //#include <avr/pgmspace.h>
 
+#include "../utilities/EEPROM_24LC64.h"
 //#include "../utilities/Buttons.h"
 #include "../include/Shard_6x8.h"
 #include "../include/Sheikah_8x8.h"
 #include "../include/F6x8.h"
 #include "../include/F8x16.h"
 #include "../include/SheikahEyeSplash.h"
+
 
 
 // OLED Resolution
@@ -52,11 +54,6 @@
 //#define BTN_START_PIN // (NOT YET ADDED)
 //#define BTN_SELECT_PIN // (NOT YET ADDED)
 
-// Menus
-#define SHEIKAH_CHAR					0
-#define SHEIKAH_NUMS					1
-#define SETTINGS						2
-#define GRAPHICS						3
 
 // Display Commands
 /*
@@ -185,25 +182,28 @@ public:
 	void clearBuffer(void);										// Clear the buffer
 	void flushBuffer(void);										// Push buffer data to the screen
 	void setPosition(unsigned char x, unsigned char y); 		// Set the coordinates
+	void setDelay(unsigned int ms); 							// Set delay in milliseconds
+
+	// Screens & Menus
 	void loadSplash(void);										// Load the splash screen bitmap from flash memory
 	void loadTitle(void);										// Load the title screen
 	void mainMenu(void);										// Menu for selecting other menus and screens
 	void settingsMenu(void);									// Display the Settings menu
-	void displayMenu(void);										// Options: SHEIKAH_CHAR, SHEIKAH_NUMS, SETTINGS
-	void handleInput(void);										// Handle Input
-	void setDelay(unsigned int ms); 							// Set delay in milliseconds
+	void setContrast(void);										// Contrast settings
+	void graphicsTest(void);									// Display the graphics test
 
 	// Text
 	void print6x8Char(unsigned char x, unsigned char y, unsigned char ch); 						// Print char (byte) at the given coordinates
-	void print6x8Str(unsigned char x, unsigned char y, const char ch[]); 					// Print string at the given coordinates (Shard_6x8 font)
+	void print6x8Str(unsigned char x, unsigned char y, const char ch[]); 						// Print string at the given coordinates (Shard_6x8 font)
 	void print6x8Single(unsigned char x, unsigned char y, char ch); 							// Print a single character (Shard_6x8 font)
-	void print8x8Str(unsigned char x, unsigned char y, const char ch[]); 					// Print string at the given coordinates (Sheikah_8x8 font)
+	void print8x8Str(unsigned char x, unsigned char y, const char ch[]); 						// Print string at the given coordinates (Sheikah_8x8 font)
 	void print8x8Single(unsigned char x, unsigned char y, char ch); 							// Print a single character (Sheikah_8x8 font)
 	void print8x16Str(unsigned char x, unsigned char y, unsigned char ch[]); 					// Print string at the given coordinates (F8x16 font)
-	void printValueC(unsigned char x, unsigned char y, char data); 								// 
-	void printValueI(unsigned char x, unsigned char y, int data); 								// 
-	void printValueF(unsigned char x, unsigned char y, float data, unsigned char num); 			// 
-	void printValueFP(unsigned char x, unsigned char y, unsigned int data, unsigned char num); 	// 
+	void printValueC(unsigned char x, unsigned char y, char data); 								// Print the value of a char
+	void printValueI(unsigned char x, unsigned char y, int data); 								// Print the value of an integer
+	void printShortValueI(unsigned char x, unsigned char y, int data);							// Print the value of an integer (3 digits)
+	void printValueF(unsigned char x, unsigned char y, float data, unsigned char num); 			// Print the value of a float
+	void printValueFP(unsigned char x, unsigned char y, unsigned int data, unsigned char num); 	// Print the value of a floating point
 
 	// Graphics
 	void drawPixel(int x, int y);																					// Draw a single pixel at the given coordinates
@@ -213,7 +213,6 @@ public:
 	void drawLineGrid(int x1, int y1, int x2, int y2, int spacing);													// Draw a line grid, top left (x1, y1) to bottom right (x2, y2)
 	void drawCircle(int x0, int y0, int radius);																	// Draw a circle at the given coordinates with the given radius
 	void drawBitmap(unsigned char x0, unsigned char y0, unsigned char x1, unsigned char y1, unsigned char bmp[]); 	// Draw a bitmap image with the given coordinates and size
-	void graphicsTest(void);
 
 	// Sheikah Character Map
 	void printSheikahMap(void); 								// Display the Sheikah character map
@@ -254,13 +253,12 @@ public:
 	void setCommonConfig(unsigned char d); 						// 
 	void setVCOMH(unsigned char d); 							// 
 	void setNOP(void); 											// 
-
-	//void (*menus[4])() = { mainMenu, printSheikahMap, settingsMenu, graphicsTest };	// Array of Menu Selection Function Pointers
 	
 	unsigned char buffer[1024]; 								// Screen buffer
-	unsigned char activeMenu = SHEIKAH_CHAR;
 	unsigned char currentMenu = 0;
 	unsigned char prevMenu;
+	unsigned char contrast = 0x7F; //EEPROM.readByte(0x50, 10);
+	unsigned char contrastBar; // = 63;
 
 	unsigned char selectorPosX = 0;
 	unsigned char selectorPosY = 0;
@@ -272,6 +270,11 @@ public:
 	unsigned char cursorPosY = 7;
 	unsigned char prevCursorPosX;
 	unsigned char prevCursorPosY;
+
+	unsigned char cursor8x8PosX = 1;
+	unsigned char cursor8x8PosY = 5;
+	unsigned char prevCursor8x8PosX;
+	unsigned char prevCursor8x8PosY;
 
 	// Box pattern
 	/*unsigned char pattern1[64] PROGMEM = {
@@ -286,7 +289,7 @@ public:
 	};*/
 
 private:
-	//unsigned int frame;
+	EEPROM_24LC64 EEPROM;
 };
 
 
