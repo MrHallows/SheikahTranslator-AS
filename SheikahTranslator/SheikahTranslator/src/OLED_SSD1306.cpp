@@ -123,7 +123,7 @@ void OLED_SSD1306::fill(unsigned char data)
 
 
 // Clear the buffer
-void OLED_SSD1306::clearBuffer(void)
+void OLED_SSD1306::clearBuffer(bool flush = false)
 {
 	/*int x, y;
 
@@ -138,8 +138,16 @@ void OLED_SSD1306::clearBuffer(void)
 	}*/
 		
 	memset(this->buffer, 0, sizeof(this->buffer));
-	this->setPosition(0, 0);
-	this->flushBuffer();
+
+	switch(flush)
+	{
+		case true:
+			this->setPosition(0, 0);
+			this->flushBuffer();
+			break;
+		case false:
+			break;
+	}
 }
 
 
@@ -412,16 +420,17 @@ void OLED_SSD1306::setContrast(void)
 	else
 		this->contrast = this->EEPROM.readByte(0x50, 0);*/
 
-	unsigned char selectorX = 0;
+	/*unsigned char selectorX = 0;
 	this->prevSelectorPosX = 0;
-	this->prevSelectorPosY = 4;
+	this->prevSelectorPosY = 4;*/
 
 	this->clearBuffer();
 	this->drawRect(0, 5, 127, 18, 0);
 
 	// Draw the progress bar
 	this->drawRect(0, 52, 127, 58, 0);
-	this->drawRect(2, 54, 125, 56, 0);
+	this->drawRect(2, 54, (this->contrast / 2), 56, 0);
+	//this->drawRect(3, 54, 3, 56, 0);
 
 	//this->drawCircle(50, 52, 6);
 	this->flushBuffer();
@@ -440,48 +449,55 @@ void OLED_SSD1306::setContrast(void)
 		// Left
 		if(digitalRead(BTN_LEFT_PIN) == HIGH) {
 			// Decrement contrast
-			if(this->contrast <= 0x00) {
-				this->contrast = 0x00;
+			if(this->contrast <= 0xA) {
+				this->contrast = 0xA;
+				this->contrastBar = 4;
 			}
 			else {
-				this->contrast--;
+				this->contrast -= 10;
 
-				if(this->contrast % 2 == 0) {
-					this->contrastBar--;
-				}
+				/*if(this->contrastBar <= 4)
+					this->contrastBar = 4;
+				else if(this->contrast % 2 == 0)*/
+					this->contrastBar = this->contrast / 2;
 			}
-			this->clearBuffer();
-			this->drawRect(2, 54, this->contrastBar, 56, 0);
+			//this->clearBuffer();
+			this->drawRect(2, 54, 125, 56, 0, BLACK);
+			this->drawRect(2, 54, this->contrastBar, 56, 0, WHITE);
+			this->drawRect(0, 52, 127, 58, 0);
 			this->flushBuffer();
 
 			this->setContrastControl(this->contrast);
-			delay(50);
+			//delay(10);
 		}
 
 		// Right
 		if(digitalRead(BTN_RIGHT_PIN) == HIGH) {
 			// Increment contrast
-			if(this->contrast >= 0xFF) {
-				this->contrast = 0xFF;
+			if(this->contrast >= 0xFA) {
+				this->contrast = 0xFA;
+				this->contrastBar = 125;
 			}
 			else {
-				this->contrast++;
+				this->contrast += 10;
 
-				if(this->contrast % 2 == 0) {
-					this->contrastBar++;
-				}
+				/*if(this->contrastBar >= 125)
+					this->contrastBar = 125;
+				else if(this->contrast % 2 == 0)*/
+					this->contrastBar = this->contrast / 2;
 			}
-			this->clearBuffer();
-			this->drawRect(2, 54, this->contrastBar, 56, 0);
+			this->drawRect(2, 54, 125, 56, 0, BLACK);
+			this->drawRect(2, 54, this->contrastBar, 56, 0, WHITE);
+			this->drawRect(0, 52, 127, 58, 0);
 			this->flushBuffer();
 
 			this->setContrastControl(this->contrast);
-			delay(50);
+			//delay(10);
 		}
 
 		// B
 		if(digitalRead(BTN_B_PIN) == HIGH) {
-			this->EEPROM.writeByte(0x50, 0, this->contrast);
+			//this->EEPROM.writeByte(0x50, 0, this->contrast);
 			return this->settingsMenu();
 		}
 
@@ -836,18 +852,46 @@ void OLED_SSD1306::printValueFP(unsigned char x, unsigned char y, unsigned int d
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // Draw Pixel
-void OLED_SSD1306::drawPixel(int x, int y)
+/*void OLED_SSD1306::drawPixel(int x, int y)
 {
 	if((x < 0) || (x >= OLED_WIDTH) || (y < 0) || (y >= OLED_HEIGHT)) // Check for boundaries
     	return;
 	else
-		this->buffer[x + (y / 8) * OLED_WIDTH] |= bit((y % 8)); // Store pixel in the buffer
+		this->buffer[x + (y / 8) * OLED_WIDTH] |= bit((y % 8)); // Store pixel data in the buffer
+}*/
+
+
+// Draw Pixel (set colour on/off)
+void OLED_SSD1306::drawPixel(int x, int y, int colour)
+{
+	if((x < 0) || (x >= OLED_WIDTH) || (y < 0) || (y >= OLED_HEIGHT)) // Check for boundaries
+		return;
+
+	/*if(colour == WHITE)
+		this->buffer[(x + (y / 8) * OLED_WIDTH)] &= bit(~(y % 8)); // Store pixel data in the buffer
+	else if(colour == BLACK)
+		this->buffer[(x + (y / 8) * OLED_WIDTH)] |= bit((y % 8)); // Store pixel data in the buffer
+	else if(colour == INVERSE)
+		this->buffer[(x + (y / 8) * OLED_WIDTH)] ^= bit((y % 8));*/ // Store pixel data in the buffer
+
+	switch (colour)
+	{
+		case WHITE:
+			this->buffer[x + (y / 8) * OLED_WIDTH] |=  (1 << (y & 7)); // Store pixel data in the buffer
+			break;
+		case BLACK:
+			this->buffer[x + (y / 8) * OLED_WIDTH] &= ~(1 << (y & 7)); // Store pixel data in the buffer
+			break;
+		case INVERSE:
+			this->buffer[x + (y / 8) * OLED_WIDTH] ^=  (1 << (y & 7)); // Store pixel data in the buffer
+			break;
+	}
 }
 
 
 // Draw Line
 // Bresenham's line drawing algorithm
-void OLED_SSD1306::drawLine(int x1, int y1, int x2, int y2, int spacing)
+void OLED_SSD1306::drawLine(int x1, int y1, int x2, int y2, int spacing, int colour)
 {
 	int cx = x1;
 	int cy = y1;
@@ -877,7 +921,7 @@ void OLED_SSD1306::drawLine(int x1, int y1, int x2, int y2, int spacing)
 	
 	for(int n = 0; n < 1000; n++)
 	{
-		this->drawPixel(cx, cy);
+		this->drawPixel(cx, cy, colour);
 
 		if((cx == x2) && (cy == y2))
 			return;
@@ -901,50 +945,50 @@ void OLED_SSD1306::drawLine(int x1, int y1, int x2, int y2, int spacing)
 
 
 // Draw Rectangle
-void OLED_SSD1306::drawRect(int x1, int y1, int x2, int y2, int spacing)
+void OLED_SSD1306::drawRect(int x1, int y1, int x2, int y2, int spacing, int colour)
 {
 	int x, y;
 	
 	// Left
 	/*for(x = x1; x < x2; x += spacing) // Iterate over x range, draw line on y1
-		this->drawPixel(x, y1);
+		this->drawPixel(x, y1, colour);
 	
-	// Left
+	// Right
 	for(x = x1; x < x2; x += spacing) // Iterate over x range, draw line on y2
-		this->drawPixel(x, y2);
+		this->drawPixel(x, y2, colour);
 	
-	// Left
+	// Top
 	for(y = y1; y < y2; y += spacing) // Iterate over y range, draw line on x1
-		this->drawPixel(x1, y);
+		this->drawPixel(x1, y, colour);
 	
-	// Left
+	// Bottom
 	for(y = y1; y < y2; y += spacing) // Iterate over y range, draw line on x2 
-		this->drawPixel(x2, y);*/
+		this->drawPixel(x2, y, colour);*/
 	
 	// Alternative method (works perfectly)
-	this->drawLine(x1, y1, x2 - 1, y1, spacing); // top
-	this->drawLine(x2, y1, x2, y2 - 1, spacing); // right
-	this->drawLine(x2, y2 - 1, x1 + 1, y2 - 1, spacing); // bottom
-	this->drawLine(x1, y2 - 1, x1, y1 + 1, spacing); // left
+	this->drawLine(x1, y1, x2 - 1, y1, spacing, colour); // top
+	this->drawLine(x2, y1, x2, y2 - 1, spacing, colour); // right
+	this->drawLine(x2, y2 - 1, x1 + 1, y2 - 1, spacing, colour); // bottom
+	this->drawLine(x1, y2 - 1, x1, y1 + 1, spacing, colour); // left
 }
 
 
 // Draw Dot Grid
-void OLED_SSD1306::drawDotGrid(int x1, int y1, int x2, int y2, int spacing)
+void OLED_SSD1306::drawDotGrid(int x1, int y1, int x2, int y2, int spacing, int colour)
 {
 	//
 }
 
 
 // Draw Line Grid
-void OLED_SSD1306::drawLineGrid(int x1, int y1, int x2, int y2, int spacing)
+void OLED_SSD1306::drawLineGrid(int x1, int y1, int x2, int y2, int spacing, int colour)
 {
 	//
 }
 
 
 // Draw Circle
-void OLED_SSD1306::drawCircle(int x0, int y0, int radius)
+void OLED_SSD1306::drawCircle(int x0, int y0, int radius, int colour)
 {
 	int x = radius; // Set x equal to radius
 	int y = 0;
@@ -952,14 +996,14 @@ void OLED_SSD1306::drawCircle(int x0, int y0, int radius)
  
 	while(x >= y)
 	{
-		this->drawPixel(x + x0, y + y0);   // First octant
-		this->drawPixel(y + x0, x + y0);   // Second octant
-		this->drawPixel(-y + x0, x + y0);  // Third octant
-		this->drawPixel(-x + x0, y + y0);  // Fourth octant
-		this->drawPixel(-x + x0, -y + y0); // Fifth octant
-		this->drawPixel(-y + x0, -x + y0); // Sixth octant
-		this->drawPixel(y + x0, -x + y0);  // Seventh octant
-		this->drawPixel(x + x0, -y + y0);  // Eighth octant
+		this->drawPixel(x + x0, y + y0, colour);   // First octant
+		this->drawPixel(y + x0, x + y0, colour);   // Second octant
+		this->drawPixel(-y + x0, x + y0, colour);  // Third octant
+		this->drawPixel(-x + x0, y + y0, colour);  // Fourth octant
+		this->drawPixel(-x + x0, -y + y0, colour); // Fifth octant
+		this->drawPixel(-y + x0, -x + y0, colour); // Sixth octant
+		this->drawPixel(y + x0, -x + y0, colour);  // Seventh octant
+		this->drawPixel(x + x0, -y + y0, colour);  // Eighth octant
 		y++;
 
 		if(de <= 0)
@@ -994,45 +1038,46 @@ void OLED_SSD1306::drawBitmap(unsigned char x0, unsigned char y0, unsigned char 
 // Graphics Test
 void OLED_SSD1306::graphicsTest(void)
 {
-	this->clearBuffer();
+	this->clearBuffer(true);
 	this->print6x8Str(0, 0, "Graphics test..");
 	delay(3000);
-	this->clearBuffer();
+	this->clearBuffer(true);
 
 	// Draw pixel
 	this->print6x8Str(0, 0, "Draw pixel..");
 	delay(2000);
-	this->clearBuffer();
+	//this->clearBuffer();
 	this->drawPixel(63, 31);
 	this->flushBuffer();
 	delay(3000);
-	this->clearBuffer();
+	this->clearBuffer(true);
 
 	// Draw line
 	this->print6x8Str(0, 0, "Draw line..");
 	delay(2000);
-	this->clearBuffer();
+	//this->clearBuffer();
 	this->drawLine(0, 31, 127, 31, 0);
 	this->flushBuffer();
 	delay(3000);
-	this->clearBuffer();
+	this->clearBuffer(true);
 
 	// Draw rectangle
 	this->print6x8Str(0, 0, "Draw rectangle..");
 	delay(2000);
-	this->clearBuffer();
+	//this->clearBuffer();
 	this->drawRect(0, 0, 127, 63, 0);
 	this->flushBuffer();
 	delay(3000);
-	this->clearBuffer();
+	this->clearBuffer(true);
 
 	// Draw circle
 	this->print6x8Str(0, 0, "Draw circle..");
 	delay(2000);
-	this->clearBuffer();
+	//this->clearBuffer();
 	this->drawCircle(63, 31, 20);
 	this->flushBuffer();
 	delay(3000);
+	//this->clearBuffer(true);
 
 	return this->mainMenu();
 }

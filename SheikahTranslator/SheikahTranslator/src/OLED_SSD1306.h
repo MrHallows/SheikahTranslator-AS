@@ -36,6 +36,11 @@
 #define OLED_WIDTH						0x80 // 128
 #define OLED_HEIGHT						0x40 // 64
 
+// Pixel Colour
+#define BLACK							0
+#define WHITE							1
+#define INVERSE							2
+
 // OLED Pins
 #define SCL_PIN 						10 // D0
 #define SDA_PIN 						9  // D1
@@ -179,7 +184,7 @@ public:
 	void writeData(unsigned char data);							// Write data
 	void cls(void); 											// Clear the screen
 	void fill(unsigned char data);								// Fill the screen
-	void clearBuffer(void);										// Clear the buffer
+	void clearBuffer(bool flush);								// Clear the buffer
 	void flushBuffer(void);										// Push buffer data to the screen
 	void setPosition(unsigned char x, unsigned char y); 		// Set the coordinates
 	void setDelay(unsigned int ms); 							// Set delay in milliseconds
@@ -206,12 +211,13 @@ public:
 	void printValueFP(unsigned char x, unsigned char y, unsigned int data, unsigned char num); 	// Print the value of a floating point
 
 	// Graphics
-	void drawPixel(int x, int y);																					// Draw a single pixel at the given coordinates
-	void drawLine(int x1, int y1, int x2, int y2, int spacing);														// Draw a line from point A (x1, y1) to point B (x2, y2)
-	void drawRect(int x1, int y1, int x2, int y2, int spacing);														// Draw a rectangle, top left (x1, y1) to bottom right (x2, y2)
-	void drawDotGrid(int x1, int y1, int x2, int y2, int spacing);													// Draw a dot grid, top left (x1, y1) to bottom right (x2, y2)
-	void drawLineGrid(int x1, int y1, int x2, int y2, int spacing);													// Draw a line grid, top left (x1, y1) to bottom right (x2, y2)
-	void drawCircle(int x0, int y0, int radius);																	// Draw a circle at the given coordinates with the given radius
+	//void drawPixel(int x, int y);																					// Draw a single pixel at the given coordinates
+	void drawPixel(int x, int y, int colour = WHITE);																// Draw a single pixel at the given coordinates (set colour on/off)
+	void drawLine(int x1, int y1, int x2, int y2, int spacing, int colour = WHITE);									// Draw a line from point A (x1, y1) to point B (x2, y2)
+	void drawRect(int x1, int y1, int x2, int y2, int spacing, int colour = WHITE);									// Draw a rectangle, top left (x1, y1) to bottom right (x2, y2)
+	void drawDotGrid(int x1, int y1, int x2, int y2, int spacing, int colour = WHITE);								// Draw a dot grid, top left (x1, y1) to bottom right (x2, y2)
+	void drawLineGrid(int x1, int y1, int x2, int y2, int spacing, int colour = WHITE);								// Draw a line grid, top left (x1, y1) to bottom right (x2, y2)
+	void drawCircle(int x0, int y0, int radius, int colour = WHITE);												// Draw a circle at the given coordinates with the given radius
 	void drawBitmap(unsigned char x0, unsigned char y0, unsigned char x1, unsigned char y1, unsigned char bmp[]); 	// Draw a bitmap image with the given coordinates and size
 
 	// Sheikah Character Map
@@ -257,8 +263,9 @@ public:
 	unsigned char buffer[1024]; 								// Screen buffer
 	unsigned char currentMenu = 0;
 	unsigned char prevMenu;
-	unsigned char contrast = 0x7F; //EEPROM.readByte(0x50, 10);
+	unsigned char contrast = 0x82; //EEPROM.readByte(0x50, 10);
 	unsigned char contrastBar; // = 63;
+	unsigned char prevContrastBar; // = 63;
 
 	unsigned char selectorPosX = 0;
 	unsigned char selectorPosY = 0;
