@@ -28,11 +28,11 @@
 
 #include "src/OLED_SSD1306.h"
 //#include "utilities/EEPROM_24LC64.h"
-#include "utilities/SRAM_23LC1024.h"
+//#include "utilities/SRAM_23LC1024.h"
 
 
 OLED_SSD1306 OLED;
-EEPROM_24LC64 _EEPROM;
+//EEPROM_24LC64 _EEPROM;
 //SRAM_23LC1024 SRAM;
 
 

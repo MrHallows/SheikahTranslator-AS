@@ -1,5 +1,5 @@
 /* *
- * Class for interfacing with the SSD1306 OLED display
+ * Class for interfacing with the SSD1306 (128x64px) OLED display
  * 
  * Wiring:
  * 
@@ -19,7 +19,8 @@
 #define OLED_SSD1306_H
 
 
-#include <Arduino.h>
+//#include <Arduino.h>
+//#include <avr/io.h>
 //#include <avr/pgmspace.h>
 
 #include "../utilities/EEPROM_24LC64.h"
@@ -175,16 +176,16 @@ static const unsigned char HR_Bottom[6] PROGMEM = { 0x40, 0x40, 0x40, 0x40, 0x40
 class OLED_SSD1306
 {
 public:
-    //OLED()
+	//OLED()
 
 	// Display
-	void initDisplay(void); 									// Initialize the display
 	void initPins(void); 										// Initialize pin configurations
+	void initDisplay(void); 									// Initialize the display
 	void writeCmd(unsigned char cmd);							// Write command
 	void writeData(unsigned char data);							// Write data
 	void cls(void); 											// Clear the screen
 	void fill(unsigned char data);								// Fill the screen
-	void clearBuffer(bool flush);								// Clear the buffer
+	void clearBuffer(bool flush = false);						// Clear the buffer
 	void flushBuffer(void);										// Push buffer data to the screen
 	void setPosition(unsigned char x, unsigned char y); 		// Set the coordinates
 	void setDelay(unsigned int ms); 							// Set delay in milliseconds
@@ -206,7 +207,7 @@ public:
 	void print8x16Str(unsigned char x, unsigned char y, unsigned char ch[]); 					// Print string at the given coordinates (F8x16 font)
 	void printValueC(unsigned char x, unsigned char y, char data); 								// Print the value of a char
 	void printValueI(unsigned char x, unsigned char y, int data); 								// Print the value of an integer
-	void printShortValueI(unsigned char x, unsigned char y, int data);							// Print the value of an integer (3 digits)
+	void printShortValueI(unsigned char x, unsigned char y, int data, unsigned char digits);	// Print the value of an integer (user-specified digit count)
 	void printValueF(unsigned char x, unsigned char y, float data, unsigned char num); 			// Print the value of a float
 	void printValueFP(unsigned char x, unsigned char y, unsigned int data, unsigned char num); 	// Print the value of a floating point
 
@@ -261,6 +262,7 @@ public:
 	void setNOP(void); 											// 
 	
 	unsigned char buffer[1024]; 								// Screen buffer
+	//unsigned char prevBuffer[1024]; 							// Previous Screen buffer
 	unsigned char currentMenu = 0;
 	unsigned char prevMenu;
 	unsigned char contrast = 0x82; //EEPROM.readByte(0x50, 10);
@@ -296,7 +298,6 @@ public:
 	};*/
 
 private:
-	EEPROM_24LC64 EEPROM;
 };
 
 

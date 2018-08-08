@@ -10,6 +10,7 @@ void EEPROM_24LC64::init(void)
 	// Initialize Serial and I2C connections
 	Serial.begin(9600);
 	Wire.begin();
+	while(!Serial);
 }
 
 
@@ -37,7 +38,7 @@ void EEPROM_24LC64::writePage(int deviceAddr, unsigned int chipAddr, unsigned ch
     for(c = 0; c < length; c++)
 	{
         Wire.write(data[c]);
-        //delay(5);
+        delay(5);
 	}
     Wire.endTransmission();
 }
@@ -91,9 +92,9 @@ void EEPROM_24LC64::writeBitmap(int deviceAddr, unsigned int chipAddr, unsigned 
 		for(c = 0; c < buffer; c++)
 		{
 			this->writePage(deviceAddr, (chipAddr + i), &data[j], buffer);
+			delay(5);
 			i++;
 			j++;
-			delay(5);
 		}
 		c = 0;
 	}

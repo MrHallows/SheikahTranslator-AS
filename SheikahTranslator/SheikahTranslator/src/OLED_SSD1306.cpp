@@ -5,6 +5,10 @@
 #include "OLED_SSD1306.h"
 
 
+// EEPROM Instance
+EEPROM_24LC64 EEPROM;
+
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
  * 								Display
@@ -37,15 +41,13 @@ void OLED_SSD1306::writeCmd(unsigned char cmd)
 	digitalWrite(DC_PIN, LOW);
 	//OLED_SCLL;
 	digitalWrite(SCL_PIN, LOW);
-	while (i--)
+	while(i--)
 	{
-		if (cmd & 0x80)
-		{
+		if(cmd & 0x80) {
 			//OLED_SDAH;
 			digitalWrite(SDA_PIN, HIGH);
 		}
-		else
-		{
+		else {
 			//OLED_SDAL;
 			digitalWrite(SDA_PIN, LOW);
 		}
@@ -71,7 +73,7 @@ void OLED_SSD1306::writeData(unsigned char data)
 	digitalWrite(SCL_PIN, LOW);
 	while(i--)
 	{
-		if (data & 0x80)
+		if(data & 0x80)
 			digitalWrite(SDA_PIN, HIGH);
 		else
 			digitalWrite(SDA_PIN, LOW);
@@ -99,7 +101,7 @@ void OLED_SSD1306::cls(void)
 		this->writeCmd(0x00);
 		this->writeCmd(0x10);*/
 
-		for (x = 0; x < OLED_WIDTH; x++)
+		for(x = 0; x < OLED_WIDTH; x++)
 			this->writeData(0x00);
 	}
 }
@@ -110,20 +112,20 @@ void OLED_SSD1306::fill(unsigned char data)
 {
 	unsigned char y, x;
 
-	for (y = 0; y < 8; y++)
+	for(y = 0; y < 8; y++)
 	{
 		this->writeCmd(0xB0 + y);
 		this->writeCmd(0x00);
 		this->writeCmd(0x10);
 
-		for (x = 0; x < OLED_WIDTH; x++)
+		for(x = 0; x < OLED_WIDTH; x++)
 			this->writeData(data);
 	}
 }
 
 
 // Clear the buffer
-void OLED_SSD1306::clearBuffer(bool flush = false)
+void OLED_SSD1306::clearBuffer(bool flush)
 {
 	/*int x, y;
 
@@ -136,13 +138,15 @@ void OLED_SSD1306::clearBuffer(bool flush = false)
 		for(y = 0; y < 8; y++) //OLED_WIDTH
 			this->buffer[y] = 0;
 	}*/
+	
+	this->setPosition(0, 0);
 		
 	memset(this->buffer, 0, sizeof(this->buffer));
 
 	switch(flush)
 	{
 		case true:
-			this->setPosition(0, 0);
+			//this->setPosition(0, 0);
 			this->flushBuffer();
 			break;
 		case false:
@@ -157,18 +161,17 @@ void OLED_SSD1306::flushBuffer(void)
 	int i, j;
 	this->setPosition(0, 0);
 
-	for(i = 0; i < 1024; i++) //OLED_WIDTH
+	for(i = 0; i < 1024; i++)
 	{
 		/*this->writeCmd(0xB0 + y);
 		this->writeCmd(0x00);
 		this->writeCmd(0x10);*/
 
-		for(j = 0; j < 8; j++) //OLED_HEIGHT
+		for(j = 0; j < 8; j++)
 		{
-			this->writeData(this->buffer[i]); // Transmit data to the display
+			this->writeData(this->buffer[i]); // Push buffer data to the display
 			i++;
-		}
-		i--;
+		} i--;
 	}
 }
 
@@ -196,9 +199,8 @@ void OLED_SSD1306::loadSplash(void)
 
 	while(1)
 	{
-		if(digitalRead(BTN_A_PIN) == HIGH || digitalRead(BTN_B_PIN) == HIGH) {
+		if(digitalRead(BTN_A_PIN) == HIGH || digitalRead(BTN_B_PIN) == HIGH)
 			return;
-		}
 	}
 }
 
@@ -212,12 +214,12 @@ void OLED_SSD1306::loadTitle(void)
 	this->drawPixel(60, 51);
 	this->drawPixel(67, 51);
 	this->drawPixel(74, 51);
-	this->flushBuffer();
 
 	this->print6x8Str(12, 1, "Sheikah Translator");
 	this->print6x8Str(0, 4, "\"It's dangerous to go");
 	this->print6x8Str(6, 5, "alone! Take this.\"");
 	this->print6x8Str(0, 7, "Happy Birthday, Matt!");
+	this->flushBuffer();
 
 	// Wait for A or B button to be pressed
 	while(1)
@@ -268,7 +270,7 @@ void OLED_SSD1306::mainMenu(void)
 
 			this->setPosition(selectorX, this->prevMenu);
 
-			for (i = 0; i < 6; i++)
+			for(i = 0; i < 6; i++)
 				this->writeData(pgm_read_byte(&(SelectorBlank[i])));
 
 			this->setSelector(selectorX, this->currentMenu);
@@ -292,7 +294,7 @@ void OLED_SSD1306::mainMenu(void)
 
 			this->setPosition(selectorX, this->prevMenu);
 
-			for (i = 0; i < 6; i++)
+			for(i = 0; i < 6; i++)
 				this->writeData(pgm_read_byte(&(SelectorBlank[i])));
 
 			this->setSelector(selectorX, this->currentMenu);
@@ -355,7 +357,7 @@ void OLED_SSD1306::settingsMenu(void)
 
 			this->setPosition(selectorX, this->prevMenu);
 
-			for (i = 0; i < 6; i++)
+			for(i = 0; i < 6; i++)
 			this->writeData(pgm_read_byte(&(SelectorBlank[i])));
 
 			this->setSelector(selectorX, this->currentMenu);
@@ -379,7 +381,7 @@ void OLED_SSD1306::settingsMenu(void)
 
 			this->setPosition(selectorX, this->prevMenu);
 
-			for (i = 0; i < 6; i++)
+			for(i = 0; i < 6; i++)
 			this->writeData(pgm_read_byte(&(SelectorBlank[i])));
 
 			this->setSelector(selectorX, this->currentMenu);
@@ -412,13 +414,14 @@ void OLED_SSD1306::settingsMenu(void)
 // Set Contrast
 void OLED_SSD1306::setContrast(void)
 {
-	/*! This is causing the display to freeze for some reason..
-	if(this->EEPROM.readByte(0x50, 0) == 0) {
-		this->contrast = 0x7F;
-		this->EEPROM.writeByte(0x50, 0, this->contrast);
+	//! This is causing the display to freeze for some reason..
+	//Serial.println(F("Data was successfully written to EEPROM!"));
+	/*if(EEPROM.readByte(0x50, 0) == 0) {
+		//this->contrast = 0x7F;
+		EEPROM.writeByte(0x50, 0, this->contrast);
 	}
 	else
-		this->contrast = this->EEPROM.readByte(0x50, 0);*/
+		this->contrast = EEPROM.readByte(0x50, 0);*/
 
 	/*unsigned char selectorX = 0;
 	this->prevSelectorPosX = 0;
@@ -433,12 +436,12 @@ void OLED_SSD1306::setContrast(void)
 	//this->drawRect(3, 54, 3, 56, 0);
 
 	//this->drawCircle(50, 52, 6);
-	this->flushBuffer();
 
 	this->print6x8Str(40, 1, "Contrast");
 	this->print6x8Str(43, 4, "<");
 	//this->printValueI(18, 4, this->contrast);
 	this->print6x8Str(79, 4, ">");
+	this->flushBuffer();
 	/*this->print6x8Str(6, 6, "Press");
 	this->print6x8Str(48, 6, "B");
 	this->print6x8Str(66, 6, "to go back");*/
@@ -455,11 +458,7 @@ void OLED_SSD1306::setContrast(void)
 			}
 			else {
 				this->contrast -= 10;
-
-				/*if(this->contrastBar <= 4)
-					this->contrastBar = 4;
-				else if(this->contrast % 2 == 0)*/
-					this->contrastBar = this->contrast / 2;
+				this->contrastBar = this->contrast / 2;
 			}
 			//this->clearBuffer();
 			this->drawRect(2, 54, 125, 56, 0, BLACK);
@@ -497,11 +496,11 @@ void OLED_SSD1306::setContrast(void)
 
 		// B
 		if(digitalRead(BTN_B_PIN) == HIGH) {
-			//this->EEPROM.writeByte(0x50, 0, this->contrast);
+			//EEPROM.writeByte(0x50, 0, this->contrast);
 			return this->settingsMenu();
 		}
 
-		this->printShortValueI(49, 4, this->contrast);
+		this->printShortValueI(49, 4, this->contrast / 10, 2);
 	}
 }
 
@@ -534,16 +533,17 @@ void OLED_SSD1306::setDelay(unsigned int ms)
 void OLED_SSD1306::print6x8Char(unsigned char x, unsigned char y, unsigned char ch)
 {
 	unsigned char c = 0, i = 0, j = 0;
-
+	
 	c = ch - 32;
-	if (x > 122)
-	{
+	if(x > 122) {
 		x = 0;
 		y++;
 	}
+	
 	this->setPosition(x, y);
-	for (i = 0; i < 6; i++)
-		this->writeData(pgm_read_byte(&(Shard_6x8[c][i])));
+	for(i = 0; i < 6; i++)
+		this->buffer[x + (y * 128) + i] = pgm_read_byte(&(Shard_6x8[c][i]));
+		//this->writeData(pgm_read_byte(&(Shard_6x8[c][i])));
 }
 
 
@@ -551,17 +551,20 @@ void OLED_SSD1306::print6x8Char(unsigned char x, unsigned char y, unsigned char 
 void OLED_SSD1306::print6x8Str(unsigned char x, unsigned char y, const char ch[])
 {
 	unsigned char c = 0, i = 0, j = 0;
-	while (ch[j] != '\0')
+	
+	while(ch[j] != '\0')
 	{
 		c = ch[j] - 32;
-		if (x > OLED_WIDTH)
-		{
+		if(x > OLED_WIDTH) {
 			x = 0;
 			y++;
 		}
+		
 		this->setPosition(x, y);
-		for (i = 0; i < 6; i++)
-			this->writeData(pgm_read_byte(&(Shard_6x8[c][i])));
+		for(i = 0; i < 6; i++) {
+			this->buffer[x + (y * 128) + i] = pgm_read_byte(&(Shard_6x8[c][i]));
+			//this->writeData(pgm_read_byte(&(Shard_6x8[c][i])));
+		}
 
 		x += 6;
 		j++;
@@ -573,17 +576,19 @@ void OLED_SSD1306::print6x8Str(unsigned char x, unsigned char y, const char ch[]
 void OLED_SSD1306::print6x8Single(unsigned char x, unsigned char y, char ch)
 {
 	unsigned char c = 0, i = 0, j = 0;
+	
 	if(ch != '\0')
 	{
 		c = ch - 32;
-		if (x > OLED_WIDTH)
-		{
+		if(x > OLED_WIDTH) {
 			x = 0;
 			y++;
 		}
+		
 		this->setPosition(x, y);
-		for (i = 0; i < 6; i++)
-			this->writeData(pgm_read_byte(&(Shard_6x8[c][i])));
+		for(i = 0; i < 6; i++)
+			this->buffer[x + (y * 128) + i] = pgm_read_byte(&(Shard_6x8[c][i]));
+			//this->writeData(pgm_read_byte(&(Shard_6x8[c][i])));
 
 		x += 6;
 	}
@@ -594,17 +599,18 @@ void OLED_SSD1306::print6x8Single(unsigned char x, unsigned char y, char ch)
 void OLED_SSD1306::print8x8Str(unsigned char x, unsigned char y, const char ch[])
 {
 	unsigned char c = 0, i = 0, j = 0;
-	while (ch[j] != '\0')
+	while(ch[j] != '\0')
 	{
 		c = ch[j] - 32;
-		if (x > OLED_WIDTH - 8)
-		{
+		if(x > OLED_WIDTH - 8) {
 			x = 0;
 			y++;
 		}
+		
 		this->setPosition(x, y);
-		for (i = 0; i < 8; i++)
-			this->writeData(pgm_read_byte(&(Sheikah_8x8[c][i])));
+		for(i = 0; i < 8; i++)
+			this->buffer[x + (y * 128) + i] = pgm_read_byte(&(Sheikah_8x8[c][i]));
+			//this->writeData(pgm_read_byte(&(Sheikah_8x8[c][i])));
 
 		x += 9;
 		j++;
@@ -616,47 +622,48 @@ void OLED_SSD1306::print8x8Str(unsigned char x, unsigned char y, const char ch[]
 void OLED_SSD1306::print8x8Single(unsigned char x, unsigned char y, char ch)
 {
 	unsigned char c = 0, i = 0, j = 0;
+	
 	if(ch != '\0')
 	{
 		c = ch - 32;
-		if (x > OLED_WIDTH - 8)
-		{
+		if(x > OLED_WIDTH - 8) {
 			x = 0;
 			y++;
 		}
+		
 		this->setPosition(x, y);
-		for (i = 0; i < 8; i++)
-			this->writeData(pgm_read_byte(&(Sheikah_8x8[c][i])));
+		for(i = 0; i < 8; i++)
+			this->buffer[x + (y * 128) + i] = pgm_read_byte(&(Sheikah_8x8[c][i]));
+			//this->writeData(pgm_read_byte(&(Sheikah_8x8[c][i])));
 
 		x += 9;
 	}
 }
 
 
-// 
+// Print F8x16 String
 void OLED_SSD1306::print8x16Str(unsigned char x, unsigned char y, unsigned char ch[])
 {
 	unsigned char c = 0, i = 0, j = 0;
-	while (ch[j] != '\0')
+	
+	while(ch[j] != '\0')
 	{
 		c = ch[j] - 32;
-		if (x > 120)
-		{
+		if(x > 120) {
 			x = 0;
 			y++;
 		}
 
 		this->setPosition(x, y);
-		for (i = 0; i < 8; i++)
-		{
-			this->writeData(pgm_read_byte(&(F8X16[(c << 4) + i])));
-		}
+		for(i = 0; i < 8; i++)
+			this->buffer[x + (y * 128) + i] = pgm_read_byte(&(F8X16[(c << 4) + i]));
+			//this->writeData(pgm_read_byte(&(F8X16[(c << 4) + i])));
 
 		this->setPosition(x, y + 1);
-		for (i = 0; i < 8; i++)
-		{
-			this->writeData(pgm_read_byte(&(F8X16[(c << 4) + i + 8])));
-		}
+		for(i = 0; i < 8; i++)
+			this->buffer[x + (y * 128) + i] = pgm_read_byte(&(F8X16[(c << 4) + i + 8]));
+			//this->writeData(pgm_read_byte(&(F8X16[(c << 4) + i + 8])));
+			
 		x += 8;
 		j++;
 	}
@@ -667,8 +674,8 @@ void OLED_SSD1306::print8x16Str(unsigned char x, unsigned char y, unsigned char 
 void OLED_SSD1306::printValueC(unsigned char x, unsigned char y, char data)
 {
 	unsigned char i, j, k;
-	if (data < 0)
-	{
+	
+	if(data < 0) {
 		this->print6x8Char(x, y, '-');
 		data = -data;
 	}
@@ -678,6 +685,7 @@ void OLED_SSD1306::printValueC(unsigned char x, unsigned char y, char data)
 	i = data / 100;
 	j = (data % 100) / 10;
 	k = data % 10;
+	
 	this->print6x8Char(x + 6, y, i + 48);
 	this->print6x8Char(x + 12, y, j + 48);
 	this->print6x8Char(x + 18, y, k + 48);
@@ -688,8 +696,8 @@ void OLED_SSD1306::printValueC(unsigned char x, unsigned char y, char data)
 void OLED_SSD1306::printValueI(unsigned char x, unsigned char y, int data)
 {
 	unsigned char i, j, k, l, m;
-	if (data < 0)
-	{
+	
+	if(data < 0) {
 		this->print6x8Char(x, y, '-');
 		data = -data;
 	}
@@ -701,6 +709,7 @@ void OLED_SSD1306::printValueI(unsigned char x, unsigned char y, int data)
 	i = (data % 1000) / 100;
 	j = (data % 100) / 10;
 	k = data % 10;
+	
 	this->print6x8Char(x + 6, y, l + 48);
 	this->print6x8Char(x + 12, y, m + 48);
 	this->print6x8Char(x + 18, y, i + 48);
@@ -710,27 +719,54 @@ void OLED_SSD1306::printValueI(unsigned char x, unsigned char y, int data)
 
 
 // 
-void OLED_SSD1306::printShortValueI(unsigned char x, unsigned char y, int data)
+void OLED_SSD1306::printShortValueI(unsigned char x, unsigned char y, int data, unsigned char digits)
 {
 	unsigned char i, j, k, l, m;
-	if (data < 0)
-	{
+	
+	if(data < 0) {
 		this->print6x8Char(x, y, '-');
 		data = -data;
 	}
 	/*else
 		this->print6x8Char(x, y, '+');*/
 
-	/*l = data / 10000;
-	m = (data % 10000) / 1000;*/
+	l = data / 10000;
+	m = (data % 10000) / 1000;
 	i = (data % 1000) / 100;
 	j = (data % 100) / 10;
 	k = data % 10;
-	/*this->print6x8Char(x + 6, y, l + 48);
-	this->print6x8Char(x + 12, y, m + 48);*/
-	this->print6x8Char(x + 6, y, i + 48);
-	this->print6x8Char(x + 12, y, j + 48);
-	this->print6x8Char(x + 18, y, k + 48);
+	
+	switch(digits)
+	{
+		case 0:
+			// Nothing to print
+			break;
+		case 1:
+			this->print6x8Char(x + 6, y, k + 48);
+			break;
+		case 2:
+			this->print6x8Char(x + 6, y, j + 48);
+			this->print6x8Char(x + 12, y, k + 48);
+			break;
+		case 3:
+			this->print6x8Char(x + 6, y, i + 48);
+			this->print6x8Char(x + 12, y, j + 48);
+			this->print6x8Char(x + 18, y, k + 48);
+			break;
+		case 4:
+			this->print6x8Char(x + 6, y, m + 48);
+			this->print6x8Char(x + 12, y, i + 48);
+			this->print6x8Char(x + 18, y, j + 48);
+			this->print6x8Char(x + 24, y, k + 48);
+			break;
+		case 5:
+			this->print6x8Char(x + 6, y, l + 48);
+			this->print6x8Char(x + 12, y, m + 48);
+			this->print6x8Char(x + 18, y, i + 48);
+			this->print6x8Char(x + 24, y, j + 48);
+			this->print6x8Char(x + 30, y, k + 48);
+			break;
+	}
 }
 
 
@@ -743,55 +779,54 @@ void OLED_SSD1306::printValueF(unsigned char x, unsigned char y, float data, uns
 	int tempdataii = (int)data;
 	long int tempdatalp = (long int)((data - (int)data) * 10000);
 
-	if (data < 0.0000001)
+	if(data < 0.0000001)
 		this->print6x8Char(x, y, '-');
 	else
 		this->print6x8Char(x, y, '+');
-	if (tempdataii < 0)
+		
+	if(tempdataii < 0)
 		tempdataii = -tempdataii;
+		
 	tempdataui = tempdataii;
 	l = tempdataui / 10000;
 	m = (tempdataui % 10000) / 1000;
 	i = (tempdataui % 1000) / 100;
 	j = (tempdataui % 100) / 10;
 	k = tempdataui % 10;
-	if (l != 0)
-	{
+	
+	if(l != 0) {
 		this->print6x8Char(x + 6, y, l + 48);
 		this->print6x8Char(x + 12, y, m + 48);
 		this->print6x8Char(x + 18, y, i + 48);
 		this->print6x8Char(x + 24, y, j + 48);
 		this->print6x8Char(x + 30, y, k + 48);
 	}
-	else if (m != 0)
-	{
+	else if(m != 0) {
 		databiti = 5;
 		this->print6x8Char(x + 6, y, m + 48);
 		this->print6x8Char(x + 12, y, i + 48);
 		this->print6x8Char(x + 18, y, j + 48);
 		this->print6x8Char(x + 24, y, k + 48);
 	}
-	else if (i != 0)
-	{
+	else if(i != 0) {
 		databiti = 4;
 		this->print6x8Char(x + 6, y, i + 48);
 		this->print6x8Char(x + 12, y, j + 48);
 		this->print6x8Char(x + 18, y, k + 48);
 	}
-	else if (j != 0)
-	{
+	else if(j != 0) {
 		databiti = 3;
 		this->print6x8Char(x + 6, y, j + 48);
 		this->print6x8Char(x + 12, y, k + 48);
 	}
-	else
-	{
+	else {
 		databiti = 2;
 		this->print6x8Char(x + 6, y, k + 48);
 	}
-	if (tempdatalp < 0)
+	if(tempdatalp < 0)
 		tempdatalp = -tempdatalp;
-	switch (num)
+		
+	switch(num)
 	{
 		case 0:
 			break;
@@ -816,30 +851,34 @@ void OLED_SSD1306::printValueFP(unsigned char x, unsigned char y, unsigned int d
 {
 	unsigned char m, i, j, k;
 	this->print6x8Char(x, y, '.');
+	
 	m = data / 1000;
 	i = (data % 1000) / 100;
 	j = (data % 100) / 10;
 	k = data % 10;
-	switch (num)
+	
+	switch(num)
 	{
-	case 1:
-		this->print6x8Char(x + 6, y, k + 48);
-		break;
-	case 2:
-		this->print6x8Char(x + 6, y, j + 48);
-		this->print6x8Char(x + 12, y, k + 48);
-		break;
-	case 3:
-		this->print6x8Char(x + 6, y, i + 48);
-		this->print6x8Char(x + 12, y, j + 48);
-		this->print6x8Char(x + 18, y, k + 48);
-		break;
-	case 4:
-		this->print6x8Char(x + 6, y, m + 48);
-		this->print6x8Char(x + 12, y, i + 48);
-		this->print6x8Char(x + 18, y, j + 48);
-		this->print6x8Char(x + 24, y, k + 48);
-		break;
+		case 0:
+			break;
+		case 1:
+			this->print6x8Char(x + 6, y, k + 48);
+			break;
+		case 2:
+			this->print6x8Char(x + 6, y, j + 48);
+			this->print6x8Char(x + 12, y, k + 48);
+			break;
+		case 3:
+			this->print6x8Char(x + 6, y, i + 48);
+			this->print6x8Char(x + 12, y, j + 48);
+			this->print6x8Char(x + 18, y, k + 48);
+			break;
+		case 4:
+			this->print6x8Char(x + 6, y, m + 48);
+			this->print6x8Char(x + 12, y, i + 48);
+			this->print6x8Char(x + 18, y, j + 48);
+			this->print6x8Char(x + 24, y, k + 48);
+			break;
 	}
 }
 
@@ -874,7 +913,7 @@ void OLED_SSD1306::drawPixel(int x, int y, int colour)
 	else if(colour == INVERSE)
 		this->buffer[(x + (y / 8) * OLED_WIDTH)] ^= bit((y % 8));*/ // Store pixel data in the buffer
 
-	switch (colour)
+	switch(colour)
 	{
 		case WHITE:
 			this->buffer[x + (y / 8) * OLED_WIDTH] |=  (1 << (y & 7)); // Store pixel data in the buffer
@@ -1112,7 +1151,7 @@ void OLED_SSD1306::printSheikahMap(void)
 	this->clearBuffer();
 	this->drawLine(0, 35, 127, 35, 0);
 	this->drawLine(0, 54, 127, 54, 0);
-	this->flushBuffer();
+	//this->flushBuffer();
 
 	this->setSelectorPos(this->selectorPosX, this->selectorPosY);
 	this->setCursor(this->cursorPosX * 6, this->cursorPosY);
@@ -1149,6 +1188,7 @@ void OLED_SSD1306::printSheikahMap(void)
 	this->print8x8Str(78, 3, "Z");
 	this->print8x8Str(96, 3, " ");
 	this->print8x8Str(114, 3, ".");
+	this->flushBuffer();
 
 	while(1)
 	{
@@ -1321,13 +1361,12 @@ void OLED_SSD1306::setSelector(unsigned char x, unsigned char y)
 
 	this->clearPrevSelector();
 
-	if (x > 114)
-	{
+	if(x > 114) {
 		x = 0;
 		y++;
 	}
 	this->setPosition(x, y);
-	for (i = 0; i < 6; i++)
+	for(i = 0; i < 6; i++)
 		this->writeData(pgm_read_byte(&(Selector[i])));
 }
 
@@ -1378,7 +1417,7 @@ void OLED_SSD1306::clearPrevSelector(void)
 
 	this->setPosition(this->prevSelectorPosX * 18, this->prevSelectorPosY);
 
-	for (i = 0; i < 6; i++)
+	for(i = 0; i < 6; i++)
 		this->writeData(pgm_read_byte(&(SelectorBlank[i])));
 }
 
@@ -1560,13 +1599,12 @@ void OLED_SSD1306::setCursor(unsigned char x, unsigned char y)
 
 	//this->clearPrevCursor();
 
-	if (x > OLED_WIDTH - 6)
-	{
+	if(x > OLED_WIDTH - 6) {
 		x = 7;
 		y++;
 	}
 	this->setPosition(x, y);
-	for (i = 0; i < 6; i++)
+	for(i = 0; i < 6; i++)
 		this->writeData(pgm_read_byte(&(Cursor[i])));
 }
 
@@ -1610,7 +1648,7 @@ void OLED_SSD1306::clearPrevCursor(void)
 
 	this->setPosition(this->prevCursorPosX * 6, this->prevCursorPosY);
 
-	for (i = 0; i < 6; i++)
+	for(i = 0; i < 6; i++)
 		this->writeData(pgm_read_byte(&(CursorBlank[i])));
 }
 
@@ -1631,7 +1669,7 @@ void OLED_SSD1306::clearLine(void)
 
 	for(j = 0; j < 120; j+=6)
 	{
-		for (i = 0; i < 6; i++)
+		for(i = 0; i < 6; i++)
 			this->writeData(pgm_read_byte(&(CursorBlank[i])));
 	}
 
@@ -1647,7 +1685,7 @@ void OLED_SSD1306::backspace(void)
 
 	this->setPosition(this->cursorPosX * 6, 7);
 
-	for (i = 0; i < 6; i++)
+	for(i = 0; i < 6; i++)
 		this->writeData(pgm_read_byte(&(CursorBlank[i])));
 
 	if(this->cursorPosX < 2)
@@ -1670,7 +1708,7 @@ void OLED_SSD1306::backspace_8x8(void)
 
 	this->setPosition(this->cursorPosX * 9, 5);
 
-	for (i = 0; i < 8; i++)
+	for(i = 0; i < 8; i++)
 		this->writeData(pgm_read_byte(&(CursorBlank_8x8[i])));
 
 	if(this->cursorPosX < 2)

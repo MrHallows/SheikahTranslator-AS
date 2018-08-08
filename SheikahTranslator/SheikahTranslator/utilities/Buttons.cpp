@@ -22,14 +22,14 @@
  * reads each button states and store it
  */
 /*void Buttons::update() {
-    for (uint8_t thisButton = 0; thisButton < NUM_BTN; thisButton++) {
+    for(uint8_t thisButton = 0; thisButton < NUM_BTN; thisButton++) {
         pinMode(pins[thisButton], INPUT_PULLUP); //enable internal pull up resistors
-        if (digitalRead(pins[thisButton]) == LOW) { //if button pressed
+        if(digitalRead(pins[thisButton]) == LOW) { //if button pressed
             states[thisButton]++; //increase button hold time
         } else {
-            if (states[thisButton] == 0)//button idle
+            if(states[thisButton] == 0)//button idle
                 continue;
-            if (states[thisButton] == 0xFF)//if previously released
+            if(states[thisButton] == 0xFF)//if previously released
                 states[thisButton] = 0; //set to idle
             else
                 states[thisButton] = 0xFF; //button just released
@@ -45,7 +45,7 @@
  * The button has to be released for it to be triggered again.
  */
 /*bool Buttons::pressed(uint8_t button) {
-    if (states[button] == 1)
+    if(states[button] == 1)
         return true;
     else
         return false;
@@ -55,7 +55,7 @@
  * return true if 'button' is released
  */
 /*bool Buttons::released(uint8_t button) {
-    if (states[button] == 0xFF)
+    if(states[button] == 0xFF)
         return true;
     else
         return false;
@@ -81,11 +81,11 @@
  * @return true if the button is held for the given time
  */
 /*bool Buttons::repeat(uint8_t button, uint8_t period) {
-    if (period <= 1) {
-        if ((states[button] != 0xFF) && (states[button]))
+    if(period <= 1) {
+        if((states[button] != 0xFF) && (states[button]))
             return true;
     } else {
-        if ((states[button] != 0xFF) && ((states[button] % period) == 1))
+        if((states[button] != 0xFF) && ((states[button] % period) == 1))
             return true;
     }
     return false;
