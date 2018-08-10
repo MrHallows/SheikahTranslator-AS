@@ -37,12 +37,12 @@
 #define OLED_WIDTH						0x80 // 128
 #define OLED_HEIGHT						0x40 // 64
 
-// Pixel Colour
-#define BLACK							0
-#define WHITE							1
+// Pixel Status
+#define OFF								0
+#define ON								1
 #define INVERSE							2
 
-// OLED Pins
+// OLED Pins (4-wire SPI mode)
 #define SCL_PIN 						10 // D0
 #define SDA_PIN 						9  // D1
 #define RST_PIN 						13 // RST
@@ -55,8 +55,8 @@
 #define BTN_RIGHT_PIN					2 // D2
 #define BTN_A_PIN						6 // D6
 #define BTN_B_PIN						7 // D7
-//#define BTN_L_PIN // Left Bumper (NOT YET ADDED)
-//#define BTN_R_PIN // Right Bumper (NOT YET ADDED)
+//#define BTN_LS_PIN // Left Shoulder (NOT YET ADDED)
+//#define BTN_RS_PIN // Right Shoulder (NOT YET ADDED)
 //#define BTN_START_PIN // (NOT YET ADDED)
 //#define BTN_SELECT_PIN // (NOT YET ADDED)
 
@@ -213,12 +213,12 @@ public:
 
 	// Graphics
 	//void drawPixel(int x, int y);																					// Draw a single pixel at the given coordinates
-	void drawPixel(int x, int y, int colour = WHITE);																// Draw a single pixel at the given coordinates (set colour on/off)
-	void drawLine(int x1, int y1, int x2, int y2, int spacing, int colour = WHITE);									// Draw a line from point A (x1, y1) to point B (x2, y2)
-	void drawRect(int x1, int y1, int x2, int y2, int spacing, int colour = WHITE);									// Draw a rectangle, top left (x1, y1) to bottom right (x2, y2)
-	void drawDotGrid(int x1, int y1, int x2, int y2, int spacing, int colour = WHITE);								// Draw a dot grid, top left (x1, y1) to bottom right (x2, y2)
-	void drawLineGrid(int x1, int y1, int x2, int y2, int spacing, int colour = WHITE);								// Draw a line grid, top left (x1, y1) to bottom right (x2, y2)
-	void drawCircle(int x0, int y0, int radius, int colour = WHITE);												// Draw a circle at the given coordinates with the given radius
+	void drawPixel(int x, int y, int status = ON);																// Draw a single pixel at the given coordinates (set colour on/off)
+	void drawLine(int x1, int y1, int x2, int y2, int spacing, int status = ON);									// Draw a line from point A (x1, y1) to point B (x2, y2)
+	void drawRect(int x1, int y1, int x2, int y2, int spacing, int status = ON);									// Draw a rectangle, top left (x1, y1) to bottom right (x2, y2)
+	void drawDotGrid(int x1, int y1, int x2, int y2, int spacing, int status = ON);								// Draw a dot grid, top left (x1, y1) to bottom right (x2, y2)
+	void drawLineGrid(int x1, int y1, int x2, int y2, int spacing, int status = ON);								// Draw a line grid, top left (x1, y1) to bottom right (x2, y2)
+	void drawCircle(int x0, int y0, int radius, int status = ON);												// Draw a circle at the given coordinates with the given radius
 	void drawBitmap(unsigned char x0, unsigned char y0, unsigned char x1, unsigned char y1, unsigned char bmp[]); 	// Draw a bitmap image with the given coordinates and size
 
 	// Sheikah Character Map
