@@ -131,19 +131,12 @@ void OLED_SSD1306::clearBuffer(bool flush)
 // Flush the buffer to the display
 void OLED_SSD1306::flushBuffer(void)
 {
-	int i = 0, j = 0;
+	int i = 0;
 	
 	setPosition(0, 0);
 
-	for(i = 0; i < 1024; i++) //OLED_WIDTH
-	{
-		for(j = 0; j < 8; j++) //OLED_HEIGHT
-		{
-			writeData(buffer[i]); // Transmit data to the display
-			i++;
-		}
-		i--;
-	}
+	for(i = 0; i < 1024; i++)
+		writeData(buffer[i]); // Transmit data to the display
 }
 
 
@@ -271,13 +264,13 @@ void OLED_SSD1306::mainMenu(void)
 		if(digitalRead(BTN_A_PIN) == HIGH) {
 			// Store prevCursorPosX
 			if(currentMenu == 4) {
-				return printSheikahMap();
+				printSheikahMap();
 			}
 			if(currentMenu == 5) {
-				return settingsMenu();
+				settingsMenu();
 			}
 			if(currentMenu == 6) {
-				return graphicsTest();
+				graphicsTest();
 			}
 			delay(200);
 		}
@@ -360,20 +353,20 @@ void OLED_SSD1306::settingsMenu(void)
 		if(digitalRead(BTN_A_PIN) == HIGH) {
 			// Store prevCursorPosX
 			if(currentMenu == 4) {
-				return setContrast();
+				setContrast();
 			}
 			if(currentMenu == 5) {
-				return settingsMenu();
+				settingsMenu();
 			}
 			if(currentMenu == 6) {
-				return graphicsTest();
+				graphicsTest();
 			}
 			delay(200);
 		}
 
 		// B
 		if(digitalRead(BTN_B_PIN) == HIGH) {
-			return mainMenu();
+			mainMenu();
 		}
 	}
 }
@@ -455,7 +448,7 @@ void OLED_SSD1306::setContrast(void)
 		// B
 		if(digitalRead(BTN_B_PIN) == HIGH) {
 			//EEPROM.writeByte(0x50, 0, contrast); // Causing the display to freeze until reset
-			return settingsMenu();
+			settingsMenu();
 		}
 
 		printShortValueI(49, 4, contrast / 10, 2);
@@ -1251,7 +1244,7 @@ void OLED_SSD1306::printSheikahMap(void)
 		if(digitalRead(BTN_B_PIN) == HIGH && digitalRead(BTN_UP_PIN) == HIGH) {
 			// Switch to main menu
 			clearBuffer();
-			return mainMenu();
+			mainMenu();
 		
 			delay(120);
 		}
