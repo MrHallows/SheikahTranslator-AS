@@ -18,10 +18,7 @@
 #ifndef OLED_SSD1306_H
 #define OLED_SSD1306_H
 
-
 //#include <Arduino.h>
-//#include <avr/io.h>
-//#include <avr/pgmspace.h>
 
 #include "../utilities/EEPROM_24LC64.h"
 //#include "../utilities/Buttons.h"
@@ -30,7 +27,6 @@
 #include "../include/F6x8.h"
 #include "../include/F8x16.h"
 #include "../include/SheikahEyeSplash.h"
-
 
 
 // OLED Resolution
@@ -44,7 +40,7 @@
 
 // OLED Pins (4-wire SPI mode)
 #define SCL_PIN 						10 // D0
-#define SDA_PIN 						9  // D1
+#define MOSI_PIN 						9  // D1
 #define RST_PIN 						13 // RST
 #define DC_PIN  						11 // DC
 
@@ -61,105 +57,6 @@
 //#define BTN_SELECT_PIN // (NOT YET ADDED)
 
 
-// Display Commands
-/*
-#define BLACK 							0
-#define WHITE 							1
-#define INVERSE 						2
-
-#define WIDTH_POS 						0
-#define HEIGHT_POS 						1
-#define FIRST_CHAR_POS 					2
-#define CHAR_NUM_POS 					3
-#define CHAR_WIDTH_START_POS 			4
-
-#define TEXT_ALIGN_LEFT 				0
-#define TEXT_ALIGN_CENTER 				1
-#define TEXT_ALIGN_RIGHT 				2
-
-#define CHARGEPUMP 						0x8D
-#define COLUMNADDR 						0x21
-#define COMSCANDEC 						0xC8
-#define COMSCANINC 						0xC0
-#define DISPLAYALLON 					0xA5
-#define DISPLAYALLON_RESUME 			0xA4
-#define DISPLAYOFF 						0xAE
-#define DISPLAYON 						0xAF
-#define EXTERNALVCC 					0x1
-#define INVERTDISPLAY 					0xA7
-#define MEMORYMODE 						0x20
-#define NORMALDISPLAY 					0xA6
-#define PAGEADDR 						0x22
-#define SEGREMAP 						0xA0
-#define SETCOMPINS 						0xDA
-#define SETCONTRAST 					0x81
-#define SETDISPLAYCLOCKDIV 				0xD5
-#define SETDISPLAYOFFSET 				0xD3
-#define SETHIGHCOLUMN 					0x10
-#define SETLOWCOLUMN 					0x00
-#define SETMULTIPLEX 					0xA8
-#define SETPRECHARGE 					0xD9
-#define SETSEGMENTREMAP 				0xA1
-#define SETSTARTLINE 					0x40
-#define SETVCOMDETECT 					0xDB
-#define SWITCHCAPVCC 					0x2
-
-// Scroll
-#define ACTIVATESCROLL 					0x2F
-#define DEACTIVATESCROLL 				0x2E
-#define SETVERTICALSCROLLAREA 			0xA3
-#define RIGHTHORIZONTALSCROLL 			0x26
-#define LEFTHORIZONTALSCROLL 			0x27
-#define VERTICALRIGHTHORIZONTALSCROLL	0x29
-#define VERTICALLEFTHORIZONTALSCROLL	0x2A
-*/
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Alternative Display Command Table
- * Datasheet: https://cdn-shop.adafruit.com/datasheets/SSD1306.pdf
- */
-// SLA (0x3C) + WRITE_MODE (0x00) =  0x78 (0b01111000)
-//#define OLED_I2C_ADDRESS   			0x3C
-/*
-// Control byte
-#define OLED_CONTROL_BYTE_CMD_SINGLE    0x80
-#define OLED_CONTROL_BYTE_CMD_STREAM    0x00
-#define OLED_CONTROL_BYTE_DATA_STREAM   0x40
-
-// Fundamental commands (pg.28)
-#define OLED_CMD_SET_CONTRAST           0x81    // follow with 0x7F
-#define OLED_CMD_DISPLAY_RAM            0xA4
-#define OLED_CMD_DISPLAY_ALLON          0xA5
-#define OLED_CMD_DISPLAY_NORMAL         0xA6
-#define OLED_CMD_DISPLAY_INVERTED       0xA7
-#define OLED_CMD_DISPLAY_OFF            0xAE	// follow with 0x00
-#define OLED_CMD_DISPLAY_ON             0xAF	// follow with 0x01
-
-// Addressing Command Table (pg.30)
-#define OLED_CMD_SET_MEMORY_ADDR_MODE   0x20    // follow with 0x00 = HORZ mode = Behave like a KS108 graphic LCD
-#define OLED_CMD_SET_COLUMN_RANGE       0x21    // can be used only in HORZ/VERT mode - follow with 0x00 and 0x7F = COL127
-#define OLED_CMD_SET_PAGE_RANGE         0x22    // can be used only in HORZ/VERT mode - follow with 0x00 and 0x07 = PAGE7
-
-// Hardware Config (pg.31)
-#define OLED_CMD_SET_DISPLAY_START_LINE 0x40
-#define OLED_CMD_SET_SEGMENT_REMAP      0xA1    // (0xA0/0xA1)
-#define OLED_CMD_SET_MUX_RATIO          0xA8    // follow with 0x3F = 64 MUX
-#define OLED_CMD_SET_COM_SCAN_MODE      0xC8    // ()
-#define OLED_CMD_SET_DISPLAY_OFFSET     0xD3    // follow with 0x00
-#define OLED_CMD_SET_COM_PIN_MAP        0xDA    // follow with 0x12
-#define OLED_CMD_NOP                    0xE3    // NOP
-
-// Timing and Driving Scheme (pg.32)
-#define OLED_CMD_SET_DISPLAY_CLK_DIV    0xD5    // follow with 0x80
-#define OLED_CMD_SET_PRECHARGE          0xD9    // follow with 0xF1
-#define OLED_CMD_SET_VCOMH_DESELCT      0xDB    // follow with 0x30
-
-// Charge Pump (pg.62)
-#define OLED_CMD_SET_CHARGE_PUMP        0x8D    // follow with 0x14
-*/
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-
 
 // Globals
 static const unsigned char Selector[6] PROGMEM = { 0x00, 0x7C, 0x38, 0x10, 0x00, 0x00 };
@@ -171,6 +68,21 @@ static const unsigned char CursorBlank_8x8[8] PROGMEM = { 0x00, 0x00, 0x00, 0x00
 static const unsigned char HR_Top[6] PROGMEM = { 0x02, 0x02, 0x02, 0x02, 0x02, 0x02 };
 static const unsigned char HR_Middle[6] PROGMEM = { 0x08, 0x08, 0x08, 0x08, 0x08, 0x08 };
 static const unsigned char HR_Bottom[6] PROGMEM = { 0x40, 0x40, 0x40, 0x40, 0x40, 0x40 };
+
+// Box pattern
+static const unsigned char boxPattern[64] PROGMEM = {
+	0x00, 0x7E, 0x42, 0x42, 0x42, 0x42, 0x7E, 0x00,
+	0x00, 0x7E, 0x42, 0x42, 0x42, 0x42, 0x7E, 0x00
+};
+
+// Cross weave pattern
+static const unsigned char weavePattern[64] PROGMEM = {
+	0x81, 0x42, 0x24, 0x18, 0x18, 0x24, 0x42, 0x81,
+	0x81, 0x42, 0x24, 0x18, 0x18, 0x24, 0x42, 0x81
+};
+
+//EEPROM_24LC64 _EEPROM;
+//SRAM_23LC1024 SRAM;
 
 
 class OLED_SSD1306
@@ -212,13 +124,12 @@ public:
 	void printValueFP(unsigned char x, unsigned char y, unsigned int data, unsigned char num); 	// Print the value of a floating point
 
 	// Graphics
-	//void drawPixel(int x, int y);																					// Draw a single pixel at the given coordinates
-	void drawPixel(int x, int y, int status = ON);																// Draw a single pixel at the given coordinates (set colour on/off)
+	void drawPixel(int x, int y, int status = ON);																	// Draw a single pixel at the given coordinates (set colour on/off)
 	void drawLine(int x1, int y1, int x2, int y2, int spacing, int status = ON);									// Draw a line from point A (x1, y1) to point B (x2, y2)
 	void drawRect(int x1, int y1, int x2, int y2, int spacing, int status = ON);									// Draw a rectangle, top left (x1, y1) to bottom right (x2, y2)
-	void drawDotGrid(int x1, int y1, int x2, int y2, int spacing, int status = ON);								// Draw a dot grid, top left (x1, y1) to bottom right (x2, y2)
+	void drawDotGrid(int x1, int y1, int x2, int y2, int spacing, int status = ON);									// Draw a dot grid, top left (x1, y1) to bottom right (x2, y2)
 	void drawLineGrid(int x1, int y1, int x2, int y2, int spacing, int status = ON);								// Draw a line grid, top left (x1, y1) to bottom right (x2, y2)
-	void drawCircle(int x0, int y0, int radius, int status = ON);												// Draw a circle at the given coordinates with the given radius
+	void drawCircle(int x0, int y0, int radius, int status = ON);													// Draw a circle at the given coordinates with the given radius
 	void drawBitmap(unsigned char x0, unsigned char y0, unsigned char x1, unsigned char y1, unsigned char bmp[]); 	// Draw a bitmap image with the given coordinates and size
 
 	// Sheikah Character Map
@@ -266,8 +177,7 @@ public:
 	unsigned char currentMenu = 0;
 	unsigned char prevMenu;
 	unsigned char contrast = 0x82; //EEPROM.readByte(0x50, 10);
-	unsigned char contrastBar; // = 63;
-	unsigned char prevContrastBar; // = 63;
+	unsigned char contrastBar;
 
 	unsigned char selectorPosX = 0;
 	unsigned char selectorPosY = 0;
@@ -284,21 +194,6 @@ public:
 	unsigned char cursor8x8PosY = 5;
 	unsigned char prevCursor8x8PosX;
 	unsigned char prevCursor8x8PosY;
-
-	// Box pattern
-	/*unsigned char pattern1[64] PROGMEM = {
-		0x00, 0x7E, 0x42, 0x42, 0x42, 0x42, 0x7E, 0x00,
-		0x00, 0x7E, 0x42, 0x42, 0x42, 0x42, 0x7E, 0x00
-	};*/
-
-	// Cross weave pattern
-	/*unsigned char pattern2[64] PROGMEM = {
-		0x81, 0x42, 0x24, 0x18, 0x18, 0x24, 0x42, 0x81,
-		0x81, 0x42, 0x24, 0x18, 0x18, 0x24, 0x42, 0x81
-	};*/
-
-private:
 };
-
 
 #endif /* defined("OLED_SSD1306_H") */

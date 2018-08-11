@@ -79,7 +79,7 @@ void EEPROM_24LC64::writeBitmap(int deviceAddr, unsigned int chipAddr, unsigned 
 
     for(c = 0; c < length; c++)
 	{
-        this->writeByte(deviceAddr, (chipAddr + i), data[c]);
+        writeByte(deviceAddr, (chipAddr + i), data[c]);
 		i++;
 		delay(100);
 	}*/
@@ -91,7 +91,7 @@ void EEPROM_24LC64::writeBitmap(int deviceAddr, unsigned int chipAddr, unsigned 
 	{
 		for(c = 0; c < buffer; c++)
 		{
-			this->writePage(deviceAddr, (chipAddr + i), &data[j], buffer);
+			writePage(deviceAddr, (chipAddr + i), &data[j], buffer);
 			delay(5);
 			i++;
 			j++;
@@ -108,7 +108,7 @@ unsigned char EEPROM_24LC64::loadBitmap(int deviceAddr, unsigned int chipAddr, u
 
 	for(i = 0; i < length; i++)
 	{
-		bitmapArray[i] = this->readByte(deviceAddr, addr);
+		bitmapArray[i] = readByte(deviceAddr, addr);
 		addr++;
 	}
 
