@@ -1,6 +1,13 @@
 /* *
  * Class for interfacing with the Atmel 24LC64 EEPROM chip (I2C)
  * 
+ * Pinout:
+ *
+ *		 A0 +--u--+ Vcc
+ *		 A1 +     + WP
+ *		 A2 +     + SCL
+ *		Vss +-----+ SDA
+ * 
  * Wiring:
  * 
  * 		24LC64       Arduino
@@ -8,11 +15,11 @@
  * 		A0...........GND
  * 		A1...........GND
  * 		A2...........GND
- * 		VSS..........GND
+ * 		Vss..........GND
  * 		SDA..........A4
  * 		SCL..........A5
  * 		WP...........GND (Until Write Protection is necessary)
- * 		VCC..........5V
+ * 		Vcc..........5V
  */
 #pragma once
 

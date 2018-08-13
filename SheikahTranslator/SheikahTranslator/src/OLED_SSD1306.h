@@ -39,10 +39,17 @@
 #define INVERSE							2
 
 // OLED Pins (4-wire SPI mode)
-#define SCL_PIN 						10 // D0
-#define MOSI_PIN 						9  // D1
-#define RST_PIN 						13 // RST
-#define DC_PIN  						11 // DC
+//#define SCL_PIN 						10 // D0
+//#define MOSI_PIN 						9  // D1
+//#define RST_PIN 						13 // RST
+//#define DC_PIN  						11 // DC
+
+// OLED Pins (4-wire SPI mode)
+#define SCL_PIN 						13 // D0
+#define MOSI_PIN 						11 // D1
+#define RST_PIN 						10 // RST
+#define DC_PIN  						9  // DC
+//#define CS_PIN  						8  // CS (tied to ground)
 
 // Button Pins
 #define BTN_UP_PIN						5 // D5
@@ -69,7 +76,7 @@ static const unsigned char HR_Top[6] PROGMEM = { 0x02, 0x02, 0x02, 0x02, 0x02, 0
 static const unsigned char HR_Middle[6] PROGMEM = { 0x08, 0x08, 0x08, 0x08, 0x08, 0x08 };
 static const unsigned char HR_Bottom[6] PROGMEM = { 0x40, 0x40, 0x40, 0x40, 0x40, 0x40 };
 
-// Box pattern
+// Box grid pattern
 static const unsigned char boxPattern[64] PROGMEM = {
 	0x00, 0x7E, 0x42, 0x42, 0x42, 0x42, 0x7E, 0x00,
 	0x00, 0x7E, 0x42, 0x42, 0x42, 0x42, 0x7E, 0x00
@@ -190,7 +197,7 @@ public:
 	unsigned char prevCursorPosX;
 	unsigned char prevCursorPosY;
 
-	unsigned char cursor8x8PosX = 1;
+	unsigned char cursor8x8PosX = 0;
 	unsigned char cursor8x8PosY = 5;
 	unsigned char prevCursor8x8PosX;
 	unsigned char prevCursor8x8PosY;

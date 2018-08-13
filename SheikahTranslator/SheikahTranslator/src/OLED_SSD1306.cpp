@@ -36,20 +36,13 @@ void OLED_SSD1306::initPins(void)
 void OLED_SSD1306::writeCmd(unsigned char cmd)
 {
 	unsigned char i = 8;
-	
 	digitalWrite(DC_PIN, LOW);
-	digitalWrite(SCL_PIN, LOW);
 	
 	for(i; i > 0; i--)
 	{
-		if(cmd & 0x80)
-			digitalWrite(MOSI_PIN, HIGH);
-		else
-			digitalWrite(MOSI_PIN, LOW);
-			
-		digitalWrite(SCL_PIN, HIGH);
-		asm("nop");
 		digitalWrite(SCL_PIN, LOW);
+		digitalWrite(MOSI_PIN, cmd & 0x80);
+		digitalWrite(SCL_PIN, HIGH);
 		cmd <<= 1;
 	}
 }
@@ -59,27 +52,15 @@ void OLED_SSD1306::writeCmd(unsigned char cmd)
 void OLED_SSD1306::writeData(unsigned char data)
 {
 	unsigned char i = 8;
-	//OLED_CS = 0;
-	//OLED_DCH;
 	digitalWrite(DC_PIN, HIGH);
-	//OLED_SCLL;
-	digitalWrite(SCL_PIN, LOW);
-	while(i--)
+
+	for(i; i > 0; i--)
 	{
-		if(data & 0x80)
-			digitalWrite(MOSI_PIN, HIGH);
-		else
-			digitalWrite(MOSI_PIN, LOW);
-
-		//OLED_SCLH;
-		digitalWrite(SCL_PIN, HIGH);
-		asm("nop");
-
-		//OLED_SCLL;
 		digitalWrite(SCL_PIN, LOW);
+		digitalWrite(MOSI_PIN, data & 0x80);
+		digitalWrite(SCL_PIN, HIGH);
 		data <<= 1;
 	}
-	//OLED_CS = 1;
 }
 
 
@@ -202,12 +183,13 @@ void OLED_SSD1306::mainMenu(void)
 
 	//setPosition(0, 0);
 	print6x8Str(37, 1, "Main Menu");
-	setSelector(selectorX, currentMenu);
 	print6x8Str(6, 4, "Translator");
 	print6x8Str(6, 5, "Settings");
 	print6x8Str(6, 6, "Graphics Test");
 	
 	flushBuffer();
+	
+	setSelector(selectorX, currentMenu);
 
 	// Wait for a selection to be made
 	while(1)
@@ -284,19 +266,20 @@ void OLED_SSD1306::settingsMenu(void)
 	currentMenu = 4;
 	unsigned char selectorX = 0;
 	prevSelectorPosX = 0;
-	prevSelectorPosY = 4;
+	prevSelectorPosY = 6;
 
 	clearBuffer();
 	
 	drawRect(0, 5, 127, 18, 0);
 
-	print6x8Str(40, 1, "Settings");
-	setSelector(selectorX, currentMenu);
+	print6x8Str(40, 1, "Settings");	
 	print6x8Str(6, 4, "Contrast");
 	print6x8Str(6, 5, "Setting 2");
 	print6x8Str(6, 6, "Setting 3");
 	
 	flushBuffer();
+	
+	setSelector(selectorX, currentMenu);
 
 	// Wait for a selection to be made
 	while(1)
@@ -319,7 +302,7 @@ void OLED_SSD1306::settingsMenu(void)
 			setPosition(selectorX, prevMenu);
 
 			for(i = 0; i < 6; i++)
-			writeData(pgm_read_byte(&(SelectorBlank[i])));
+				writeData(pgm_read_byte(&(SelectorBlank[i])));
 
 			setSelector(selectorX, currentMenu);
 			delay(200);
@@ -366,6 +349,7 @@ void OLED_SSD1306::settingsMenu(void)
 
 		// B
 		if(digitalRead(BTN_B_PIN) == HIGH) {
+			delay(100);
 			mainMenu();
 		}
 	}
@@ -377,9 +361,9 @@ void OLED_SSD1306::setContrast(void)
 {
 	//! This is causing the display to freeze for some reason..
 	Serial.println(F("Data was successfully written to EEPROM!"));
-	/*if(EEPROM.readByte(0x50, 0) == 0) {
+	/*if(EEPROM.readByte(0x50, 10) == 0) {
 		//contrast = 0x7F;
-		EEPROM.writeByte(0x50, 0, contrast);
+		EEPROM.writeByte(0x50, 10, contrast);
 	}
 	else
 		contrast = EEPROM.readByte(0x50, 0);
@@ -396,7 +380,7 @@ void OLED_SSD1306::setContrast(void)
 
 	print6x8Str(40, 1, "Contrast");
 	print6x8Str(43, 4, "<");
-	//printValueI(18, 4, contrast);
+	printShortValueI(49, 4, (contrast / 10), 2);
 	print6x8Str(79, 4, ">");
 	
 	flushBuffer();
@@ -415,14 +399,14 @@ void OLED_SSD1306::setContrast(void)
 				contrast -= 10;
 				contrastBar = contrast / 2;
 			}
-			//clearBuffer();
 			drawRect(2, 54, 125, 56, 0, OFF);
 			drawRect(2, 54, contrastBar, 56, 0, ON);
 			drawRect(0, 52, 127, 58, 0);
+			printShortValueI(49, 4, (contrast / 10), 2);
 			flushBuffer();
 
 			setContrastControl(contrast);
-			//delay(10);
+			delay(10);
 		}
 
 		// Right
@@ -439,19 +423,19 @@ void OLED_SSD1306::setContrast(void)
 			drawRect(2, 54, 125, 56, 0, OFF);
 			drawRect(2, 54, contrastBar, 56, 0, ON);
 			drawRect(0, 52, 127, 58, 0);
+			printShortValueI(49, 4, (contrast / 10), 2);
 			flushBuffer();
 
 			setContrastControl(contrast);
-			//delay(10);
+			delay(10);
 		}
 
 		// B
 		if(digitalRead(BTN_B_PIN) == HIGH) {
-			//EEPROM.writeByte(0x50, 0, contrast); // Causing the display to freeze until reset
+			//EEPROM.writeByte(0x50, 10, contrast); // Causing the display to freeze until reset
+			delay(100);
 			settingsMenu();
 		}
-
-		printShortValueI(49, 4, contrast / 10, 2);
 	}
 }
 
@@ -528,8 +512,8 @@ void OLED_SSD1306::print6x8Single(unsigned char x, unsigned char y, char ch)
 		
 		setPosition(x, y);
 		for(i = 0; i < 6; i++) {
-			buffer[x + (y * 128) + i] = pgm_read_byte(&(Shard_6x8[c][i]));
-			//writeData(pgm_read_byte(&(Shard_6x8[c][i])));
+			//buffer[x + (y * 128) + i] = pgm_read_byte(&(Shard_6x8[c][i]));
+			writeData(pgm_read_byte(&(Shard_6x8[c][i])));
 		}
 		x += 6;
 	}
@@ -574,8 +558,8 @@ void OLED_SSD1306::print8x8Single(unsigned char x, unsigned char y, char ch)
 		
 		setPosition(x, y);
 		for(i = 0; i < 8; i++) {
-			buffer[x + (y * 128) + i] = pgm_read_byte(&(Sheikah_8x8[c][i]));
-			//writeData(pgm_read_byte(&(Sheikah_8x8[c][i])));
+			//buffer[x + (y * 128) + i] = pgm_read_byte(&(Sheikah_8x8[c][i]));
+			writeData(pgm_read_byte(&(Sheikah_8x8[c][i])));
 		}
 		x += 9;
 	}
@@ -1077,10 +1061,7 @@ void OLED_SSD1306::printSheikahMap(void)
 	clearBuffer();
 	drawLine(0, 35, 127, 35, 0);
 	drawLine(0, 54, 127, 54, 0);
-	flushBuffer();
-
-	setSelectorPos(selectorPosX, selectorPosY);
-	setCursor(cursorPosX * 6, cursorPosY);
+	
 	print6x8Str(0, 7, ">");
 
 	print8x8Str(6, 0, "A");
@@ -1115,6 +1096,9 @@ void OLED_SSD1306::printSheikahMap(void)
 	print8x8Str(96, 3, " ");
 	print8x8Str(114, 3, ".");
 	flushBuffer();
+
+	setSelectorPos(selectorPosX, selectorPosY);
+	setCursor(cursorPosX * 6, cursorPosY);
 
 	while(1)
 	{
@@ -1191,9 +1175,9 @@ void OLED_SSD1306::printSheikahMap(void)
 			// Store prevCursorPosX
 			prevCursorPosX = cursorPosX - 1;
 			// Increment selectorPosX
-			if(cursorPosX >= 14) { //20
-				cursorPosX = 14; //20
-				prevCursorPosX = 13; //19
+			if(cursorPosX >= 15) { //20
+				cursorPosX = 15; //20
+				prevCursorPosX = 14; //19
 			}
 			else {
 				cursorPosX++;
@@ -1201,7 +1185,7 @@ void OLED_SSD1306::printSheikahMap(void)
 			//clearPrevCursor();
 			setCursorPos(cursorPosX, cursorPosY);
 			print6x8Single(prevCursorPosX * 6, 7, getSelectedChar());
-			print8x8Single(prevCursorPosX * 9, 5, getSelectedChar());
+			print8x8Single((prevCursorPosX - 1) * 9, 5, getSelectedChar());
 			//cursorPosX++;
 			//setCursor(cursorPosX * 6, 7);
 			delay(200);
@@ -1632,21 +1616,13 @@ void OLED_SSD1306::backspace_8x8(void)
 {
 	unsigned char i = 0;
 
-	setPosition(cursorPosX * 9, 5);
+	setPosition((cursorPosX - 1) * 9, 5);
 
 	for(i = 0; i < 8; i++)
 		writeData(pgm_read_byte(&(CursorBlank_8x8[i])));
 
 	if(cursorPosX < 2)
 		cursorPosX = 1;
-	/*else
-	{
-		prevCursorPosX++;
-		//clearPrevCursor();
-		cursorPosX--;
-		prevCursorPosX--;
-	}*/
-	//setCursor(cursorPosX * 9, 5);
 }
 
 
@@ -1849,14 +1825,10 @@ void OLED_SSD1306::initDisplay(void)
 {
 	unsigned char i;
 	initPins();
-	//OLED_PORT = 0x0F;
-	//OLED_SCLH;
-	//OLED_RSTL;
+	
 	digitalWrite(SCL_PIN, HIGH);
 	digitalWrite(RST_PIN, LOW);
-	//for(i = 0; i < 100; i++) asm("nop");
 	delay(50);
-	//OLED_RSTH;
 	digitalWrite(RST_PIN, HIGH);
 	//delay(100);
 
