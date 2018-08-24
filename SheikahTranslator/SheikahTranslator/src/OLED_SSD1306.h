@@ -15,15 +15,17 @@
  */
 #pragma once
 
-#ifndef OLED_SSD1306_H
-#define OLED_SSD1306_H
+#ifndef __OLED_SSD1306_H__
+#define __OLED_SSD1306_H__
 
 //#include <Arduino.h>
 
 #include "../utilities/EEPROM_24LC64.h"
-//#include "../utilities/Buttons.h"
+//#include "../utilities/SRAM_23LC1024.h"
+//#include "../utilities/RTC_MPC7940M.h"
 #include "../include/Shard_6x8.h"
 #include "../include/Sheikah_8x8.h"
+#include "../include/F8x16.h"
 #include "../include/F6x8.h"
 #include "../include/F8x16.h"
 #include "../include/SheikahEyeSplash.h"
@@ -39,25 +41,25 @@
 #define INVERSE							2
 
 // OLED Pins (4-wire SPI mode)
-//#define SCL_PIN 						10 // D0
+//#define SCK_PIN 						10 // D0
 //#define MOSI_PIN 						9  // D1
 //#define RST_PIN 						13 // RST
 //#define DC_PIN  						11 // DC
 
 // OLED Pins (4-wire SPI mode)
-#define SCL_PIN 						13 // D0
-#define MOSI_PIN 						11 // D1
-#define RST_PIN 						10 // RST
-#define DC_PIN  						9  // DC
-//#define CS_PIN  						8  // CS (tied to ground)
+#define SCK_PIN 						10 // D0
+#define MOSI_PIN 						9  // D1
+#define RST_PIN 						13 // RST
+#define DC_PIN  						11 // DC
+#define CS_PIN  						12 // CS
 
 // Button Pins
-#define BTN_UP_PIN						5 // D5
-#define BTN_DOWN_PIN					4 // D4
-#define BTN_LEFT_PIN					3 // D3
-#define BTN_RIGHT_PIN					2 // D2
-#define BTN_A_PIN						6 // D6
-#define BTN_B_PIN						7 // D7
+#define BTN_UP_PIN						5  // D5
+#define BTN_DOWN_PIN					4  // D4
+#define BTN_LEFT_PIN					3  // D3
+#define BTN_RIGHT_PIN					2  // D2
+#define BTN_A_PIN						6  // D6
+#define BTN_B_PIN						7  // D7
 //#define BTN_LS_PIN // Left Shoulder (NOT YET ADDED)
 //#define BTN_RS_PIN // Right Shoulder (NOT YET ADDED)
 //#define BTN_START_PIN // (NOT YET ADDED)
@@ -88,15 +90,10 @@ static const unsigned char weavePattern[64] PROGMEM = {
 	0x81, 0x42, 0x24, 0x18, 0x18, 0x24, 0x42, 0x81
 };
 
-//EEPROM_24LC64 _EEPROM;
-//SRAM_23LC1024 SRAM;
-
 
 class OLED_SSD1306
 {
 public:
-	//OLED()
-
 	// Display
 	void initPins(void); 										// Initialize pin configurations
 	void initDisplay(void); 									// Initialize the display
@@ -104,7 +101,8 @@ public:
 	void writeData(unsigned char data);							// Write data
 	void cls(void); 											// Clear the screen
 	void fill(unsigned char data);								// Fill the screen
-	void clearBuffer(bool flush = false);						// Clear the buffer
+	void clearBuffer(void);										// Clear the buffer
+	void clearBuffer(unsigned char page_start, unsigned char page_end);		// Clear the buffer
 	void flushBuffer(void);										// Push buffer data to the screen
 	void setPosition(unsigned char x, unsigned char y); 		// Set the coordinates
 	void setDelay(unsigned int ms); 							// Set delay in milliseconds
@@ -115,15 +113,17 @@ public:
 	void mainMenu(void);										// Menu for selecting other menus and screens
 	void settingsMenu(void);									// Display the Settings menu
 	void setContrast(void);										// Contrast settings
+	void setInverse(void);										// Inverse display settings
 	void graphicsTest(void);									// Display the graphics test
 
 	// Text
 	void print6x8Char(unsigned char x, unsigned char y, unsigned char ch); 						// Print char (byte) at the given coordinates
 	void print6x8Str(unsigned char x, unsigned char y, const char ch[]); 						// Print string at the given coordinates (Shard_6x8 font)
+	//void drawString(int x, int y, String text);
 	void print6x8Single(unsigned char x, unsigned char y, char ch); 							// Print a single character (Shard_6x8 font)
 	void print8x8Str(unsigned char x, unsigned char y, const char ch[]); 						// Print string at the given coordinates (Sheikah_8x8 font)
 	void print8x8Single(unsigned char x, unsigned char y, char ch); 							// Print a single character (Sheikah_8x8 font)
-	void print8x16Str(unsigned char x, unsigned char y, unsigned char ch[]); 					// Print string at the given coordinates (F8x16 font)
+	void print8x16Str(unsigned char x, unsigned char y, const char ch[]); 					// Print string at the given coordinates (F8x16 font)
 	void printValueC(unsigned char x, unsigned char y, char data); 								// Print the value of a char
 	void printValueI(unsigned char x, unsigned char y, int data); 								// Print the value of an integer
 	void printShortValueI(unsigned char x, unsigned char y, int data, unsigned char digits);	// Print the value of an integer (user-specified digit count)
@@ -145,7 +145,7 @@ public:
 	void setSelector(unsigned char x, unsigned char y); 		// Place the selector at the given position
 	void setSelectorPos(unsigned char x, unsigned char y); 		// 
 	void clearPrevSelector(void); 								// 
-	unsigned char getSelectedChar(void); 						// 
+	inline unsigned char getSelectedChar(void); 				// 
 	void moveSelector(void); 									// 
 
 	// Terminal Input
@@ -154,6 +154,7 @@ public:
 	void clearPrevCursor(void); 								// 
 	void printLine(void); 										// 
 	void clearLine(void); 										// 
+	void clearLine8x8(void);									// 
 	void backspace(void); 										// 
 	void backspace_8x8(void); 									// 
 
@@ -180,11 +181,13 @@ public:
 	void setNOP(void); 											// 
 	
 	unsigned char buffer[1024]; 								// Screen buffer
-	//unsigned char prevBuffer[1024]; 							// Previous Screen buffer
 	unsigned char currentMenu = 0;
 	unsigned char prevMenu;
-	unsigned char contrast = 0x82; //EEPROM.readByte(0x50, 10);
+	unsigned char contrast;
 	unsigned char contrastBar;
+	bool isInverted;
+	unsigned char inverse;
+	unsigned char inverseBar;
 
 	unsigned char selectorPosX = 0;
 	unsigned char selectorPosY = 0;
@@ -203,4 +206,4 @@ public:
 	unsigned char prevCursor8x8PosY;
 };
 
-#endif /* defined("OLED_SSD1306_H") */
+#endif /* defined("__OLED_SSD1306_H__") */

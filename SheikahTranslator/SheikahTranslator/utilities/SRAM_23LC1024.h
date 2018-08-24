@@ -16,8 +16,8 @@
  */
 #pragma once
 
-#ifndef SRAM_H
-#define SRAM_H
+#ifndef __SRAM_23LC1024_H__
+#define __SRAM_23LC1024_H__
 
 #include <SPI.h>
 
@@ -58,4 +58,4 @@ class SRAM_23LC1024
 	void readArray(unsigned int address, unsigned char* data, unsigned short big);
 };
 
-#endif /* defined("SRAM_H") */
+#endif /* defined("__SRAM_23LC1024_H__") */

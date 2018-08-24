@@ -20,11 +20,23 @@
  * 		SCL..........A5
  * 		WP...........GND (Until Write Protection is necessary)
  * 		Vcc..........5V
+ *
+ *
+ * 		25AA1024     Arduino
+ * 		--------------------
+ * 		A0...........GND
+ * 		A1...........GND
+ * 		A2...........5V
+ * 		Vss..........GND
+ * 		SDA..........A4
+ * 		SCL..........A5
+ * 		WP...........GND (Until Write Protection is necessary)
+ * 		Vcc..........5V
  */
 #pragma once
 
-#ifndef EEPROM_24LC64_H
-#define EEPROM_24LC64_H
+#ifndef __EEPROM_24LC64_H__
+#define __EEPROM_24LC64_H__
 
 #include <Arduino.h>
 #include <Wire.h>
@@ -43,4 +55,4 @@ public:
 	unsigned char loadBitmap(int deviceAddr, unsigned int chipAddr, unsigned char length);
 };
 
-#endif /* defined("EEPROM_24LC64_H") */
+#endif /* defined("__EEPROM_24LC64_H__") */

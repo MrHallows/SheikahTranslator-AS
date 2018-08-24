@@ -15,9 +15,9 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Equation for centering text:
  * L = length of text (i.e., "Main Menu" is 9 characters * 6 = 54
- * SW = Screen Width (128)
+ * W = Screen Width (128)
  * 
- * (0.5)SW - (0.5)L = X position of text
+ * (W / 2) - (L * 6 / 2) = X position of text
  * Ex.: 64 - 27 = 37 => print6x8Str(37, 0, "Main Menu");
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

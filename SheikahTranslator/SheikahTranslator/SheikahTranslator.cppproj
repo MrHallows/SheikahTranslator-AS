@@ -248,6 +248,12 @@
     <Compile Include="utilities\EEPROM_24LC64.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="utilities\RTC_MPC7940M.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="utilities\RTC_MPC7940M.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="utilities\SRAM_23LC1024.cpp">
       <SubType>compile</SubType>
     </Compile>

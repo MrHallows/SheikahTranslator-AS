@@ -8,9 +8,8 @@
 void EEPROM_24LC64::init(void)
 {
 	// Initialize Serial and I2C connections
-	Serial.begin(9600);
+	Serial.begin(57600);
 	Wire.begin();
-	while(!Serial);
 }
 
 
@@ -24,11 +23,11 @@ void EEPROM_24LC64::writeByte(int deviceAddr, unsigned int chipAddr, unsigned ch
     Wire.write(rdata);
     Wire.endTransmission();
 
-    delay(5);
+    delay(10);
 }
 
 // WARNING: Address is a page address, 6-bit end will wrap around.
-// Also, data can be a maximum of about 30 bytes due to the Wire library's buffer of 32 bytes
+// Maximum of 30 bytes due to Wire library's 32 byte buffer
 void EEPROM_24LC64::writePage(int deviceAddr, unsigned int chipAddr, unsigned char* data, unsigned char length)
 {
     Wire.beginTransmission(deviceAddr);
@@ -38,7 +37,7 @@ void EEPROM_24LC64::writePage(int deviceAddr, unsigned int chipAddr, unsigned ch
     for(c = 0; c < length; c++)
 	{
         Wire.write(data[c]);
-        delay(5);
+        delay(10);
 	}
     Wire.endTransmission();
 }
@@ -58,7 +57,7 @@ unsigned char EEPROM_24LC64::readByte(int deviceAddr, unsigned int chipAddr)
     return rdata;
 }
 
-// It may be best to not read more than 30 or 32 bytes at a time..
+// Do not read more than 30 at a time..
 void EEPROM_24LC64::readBuffer(int deviceAddr, unsigned int chipAddr, unsigned char* buffer, int length)
 {
     Wire.beginTransmission(deviceAddr);
@@ -92,7 +91,7 @@ void EEPROM_24LC64::writeBitmap(int deviceAddr, unsigned int chipAddr, unsigned 
 		for(c = 0; c < buffer; c++)
 		{
 			writePage(deviceAddr, (chipAddr + i), &data[j], buffer);
-			delay(5);
+			delay(10);
 			i++;
 			j++;
 		}
